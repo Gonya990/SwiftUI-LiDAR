@@ -22,7 +22,15 @@ struct StartView: View {
     var body: some View {
         NavigationStack {
             if  isLidarCapable() {
-                VStack {
+                VStack(spacing: 16) {
+                    Text("LiDAR 3D Scanner")
+                        .font(.title2.bold())
+                    Text("Сканирует комнату/объект в 3D-модель (.obj), не фото.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+
                     Button {
                         shouldNavigateToScanView = true
                     } label: {

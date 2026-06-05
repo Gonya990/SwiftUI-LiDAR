@@ -1,0 +1,30 @@
+name: Lidar Scan
+options:
+  bundleIdPrefix: com.igorgoncharenko
+  deploymentTarget:
+    iOS: "16.6"
+settings:
+  base:
+    DEVELOPMENT_TEAM: DW65K3AAUJ
+    SWIFT_VERSION: "5.0"
+targets:
+  "Lidar Scan":
+    type: application
+    platform: iOS
+    sources:
+      - path: Lidar Scan
+        excludes:
+          - Preview Content
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_NAME: "Lidar Scan IGORAN"
+        PRODUCT_BUNDLE_IDENTIFIER: com.igorgoncharenko.lidarscan
+        INFOPLIST_KEY_CFBundleDisplayName: "Igor G-LIDAR"
+        INFOPLIST_KEY_NSCameraUsageDescription: "The app would like to use your camera to scan your room using the LiDAR sensor."
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_ENTITLEMENTS: Lidar Scan/Lidar_Scan.entitlements
+    entitlements:
+      path: Lidar Scan/Lidar_Scan.entitlements

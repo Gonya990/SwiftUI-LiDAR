@@ -2,62 +2,122 @@
 //  Capture3DScanView.swift
 //  Lidar Scan
 //
-//  Created by Cedan Misquith on 27/04/25.
-//
 
 import SwiftUI
 
 struct Capture3DScanView: View {
     @Environment(\.presentationMode) var mode: Binding<PresentationMode>
-    @State var submittedExportRequest = false
-    @State var submittedName = ""
-    @State var pauseSession: Bool = false
+    @State private var exportTrigger = 0
+    @State private var exportFileName = ""
+    @State private var exportResult: ScanExportResult = .idle
+    @State private var pauseSession = false
+    @State private var showHint = true
+    @State private var statusMessage = ""
+
     var body: some View {
-        NavigationView {
-            ZStack(alignment: .bottom) {
-                ARWrapperView(submittedExportRequest: $submittedExportRequest,
-                              submittedName: $submittedName,
-                              pauseSession: $pauseSession)
-                .ignoresSafeArea()
-                VStack {
-                    HStack {
-                        Button {
-                            self.mode.wrappedValue.dismiss()
-                        } label: {
-                            Text("Back")
-                                .frame(width: 80)
-                                .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                        }
-                        .frame(width: 40, height: 40)
-                        Spacer()
-                    }.padding(.leading, 40)
-                    Spacer()
-                    Button {
-                        pauseSession = true
-                        alertView(title: "Save File",
-                                  message: "Enter your file name",
-                                  hintText: "file name") { text in
-                            submittedName = text
-                            submittedExportRequest.toggle()
-                            self.mode.wrappedValue.dismiss()
-                        } secondaryAction: {
-                            print("Cancelled")
-                            pauseSession = false
-                        }
-                    } label: {
-                        Text("Export")
-                            .frame(width: UIScreen.main.bounds.width-120)
-                            .padding()
+        ZStack(alignment: .bottom) {
+            ARWrapperView(
+                exportTrigger: $exportTrigger,
+                exportFileName: $exportFileName,
+                exportResult: $exportResult,
+                pauseSession: $pauseSession
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: 12) {
+                if showHint {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("1. Медленно обходи объект / комнату (30–60 сек)")
+                        Text("2. Белая сетка = LiDAR видит поверхности")
+                        Text("3. Когда сетка покроет объект — Export")
+                    }
+                    .font(.footnote)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+                    .onTapGesture { showHint = false }
+                }
+
+                if !statusMessage.isEmpty {
+                    Text(statusMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal)
+                }
+
+                HStack {
+                    Button { mode.wrappedValue.dismiss() } label: {
+                        Text("Back")
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
                             .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
+                    Spacer()
+                }
+                .padding(.horizontal, 24)
+
+                Button { beginExport() } label: {
+                    Text("Export 3D model")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+            }
+        }
+        .navigationBarHidden(true)
+        .onChange(of: exportResult) { result in
+            switch result {
+            case .idle:
+                break
+            case .success(let fileName):
+                pauseSession = false
+                statusMessage = "Saved: \(fileName)"
+                simpleAlert(title: "Saved", message: "\(fileName) — open View 3D Scans") {
+                    exportResult = .idle
+                    mode.wrappedValue.dismiss()
+                }
+            case .failed(let message):
+                pauseSession = false
+                statusMessage = message
+                simpleAlert(title: "Export failed", message: message) {
+                    exportResult = .idle
                 }
             }
         }
+    }
+
+    private func beginExport() {
+        alertView(
+            title: "Save scan",
+            message: "Enter file name",
+            hintText: "kitchen-table"
+        ) { text in
+            exportFileName = text
+            statusMessage = "Saving..."
+            exportTrigger += 1
+        } secondaryAction: {}
+    }
+
+    private func simpleAlert(title: String, message: String, onOk: @escaping () -> Void) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in onOk() })
+        rootController().present(alert, animated: true)
+    }
+
+    private func rootController() -> UIViewController {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let root = scene.windows.first?.rootViewController else {
+            return UIViewController()
+        }
+        return root
     }
 }
 

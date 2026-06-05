@@ -2,60 +2,135 @@
 //  ARWrapperView.swift
 //  Lidar Scan
 //
-//  Created by Cedan Misquith on 27/04/25.
-//
 
 import SwiftUI
 import RealityKit
 import ARKit
 
+enum ScanExportResult: Equatable {
+    case idle
+    case success(fileName: String)
+    case failed(message: String)
+}
+
 struct ARWrapperView: UIViewRepresentable {
-    @Binding var submittedExportRequest: Bool
-    @Binding var submittedName: String
+    @Binding var exportTrigger: Int
+    @Binding var exportFileName: String
+    @Binding var exportResult: ScanExportResult
     @Binding var pauseSession: Bool
-    let arView = ARView(frame: .zero)
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(
+            exportTrigger: $exportTrigger,
+            exportFileName: $exportFileName,
+            exportResult: $exportResult,
+            pauseSession: $pauseSession
+        )
+    }
+
     func makeUIView(context: Context) -> ARView {
+        let arView = ARView(frame: .zero)
+        arView.automaticallyConfigureSession = false
+        arView.environment.sceneUnderstanding.options = [.occlusion, .physics]
+        arView.debugOptions.insert(.showSceneUnderstanding)
+
+        context.coordinator.arView = arView
+        context.coordinator.startSessionIfNeeded(on: arView)
         return arView
     }
+
     func updateUIView(_ uiView: ARView, context: Context) {
-        let viewModel = ExportViewModel()
-        setARViewOptions(arView)
-        let configuration = buildConfigure()
-        if submittedExportRequest {
-            guard let camera = arView.session.currentFrame?.camera else { return }
-            if let meshAnchors = arView.session.currentFrame?.anchors.compactMap( { $0 as? ARMeshAnchor }),
-               let asset = viewModel.convertToAsset(meshAnchor: meshAnchors, camera: camera) {
-                do {
-                    try ExportViewModel().export(asset: asset, fileName: submittedName)
-                } catch {
-                    print("Export Failed")
+        context.coordinator.handleUpdates(on: uiView)
+    }
+
+    final class Coordinator: NSObject {
+        @Binding var exportTrigger: Int
+        @Binding var exportFileName: String
+        @Binding var exportResult: ScanExportResult
+        @Binding var pauseSession: Bool
+
+        weak var arView: ARView?
+        private var sessionRunning = false
+        private var lastHandledExportTrigger = 0
+
+        init(
+            exportTrigger: Binding<Int>,
+            exportFileName: Binding<String>,
+            exportResult: Binding<ScanExportResult>,
+            pauseSession: Binding<Bool>
+        ) {
+            _exportTrigger = exportTrigger
+            _exportFileName = exportFileName
+            _exportResult = exportResult
+            _pauseSession = pauseSession
+        }
+
+        func startSessionIfNeeded(on arView: ARView) {
+            guard !sessionRunning else { return }
+            let configuration = ARWorldTrackingConfiguration()
+            configuration.environmentTexturing = .automatic
+            configuration.sceneReconstruction = .meshWithClassification
+            if ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) {
+                configuration.frameSemantics.insert(.sceneDepth)
+            }
+            arView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+            sessionRunning = true
+        }
+
+        func handleUpdates(on arView: ARView) {
+            // Export first — even if alert had paused the session momentarily
+            if exportTrigger != lastHandledExportTrigger {
+                lastHandledExportTrigger = exportTrigger
+                performExport(from: arView)
+            }
+
+            if pauseSession {
+                if sessionRunning {
+                    arView.session.pause()
+                    sessionRunning = false
                 }
+                return
+            }
+
+            if !sessionRunning {
+                startSessionIfNeeded(on: arView)
             }
         }
-        if pauseSession {
-            arView.session.pause()
-        } else {
-            arView.session.run(configuration)
+
+        private func performExport(from arView: ARView) {
+            guard let frame = arView.session.currentFrame else {
+                exportResult = .failed(message: "AR session not ready. Try again.")
+                return
+            }
+
+            let meshAnchors = frame.anchors.compactMap { $0 as? ARMeshAnchor }
+            guard !meshAnchors.isEmpty else {
+                exportResult = .failed(message: "No 3D mesh yet. Walk slowly around the object for 30–60 sec.")
+                return
+            }
+
+            let viewModel = ExportViewModel()
+            guard let asset = viewModel.convertToAsset(
+                meshAnchor: meshAnchors,
+                camera: frame.camera
+            ) else {
+                exportResult = .failed(message: "Could not build 3D model.")
+                return
+            }
+
+            do {
+                let savedName = try viewModel.export(asset: asset, fileName: exportFileName)
+                exportResult = .success(fileName: savedName)
+            } catch {
+                exportResult = .failed(message: error.localizedDescription)
+            }
         }
-    }
-    private func buildConfigure() -> ARWorldTrackingConfiguration {
-        let configuration = ARWorldTrackingConfiguration()
-        configuration.environmentTexturing = .automatic
-        arView.automaticallyConfigureSession = false
-        configuration.sceneReconstruction = .meshWithClassification
-        if type(of: configuration).supportsFrameSemantics(.sceneDepth) {
-            configuration.frameSemantics = .sceneDepth
-        }
-        return configuration
-    }
-    private func setARViewOptions(_ arView: ARView) {
-        arView.debugOptions.insert(.showSceneUnderstanding)
     }
 }
 
 class ExportViewModel: NSObject, ObservableObject, ARSessionDelegate {
     func convertToAsset(meshAnchor: [ARMeshAnchor], camera: ARCamera) -> MDLAsset? {
-        guard let device = MTLCreateSystemDefaultDevice() else { return nil}
+        guard let device = MTLCreateSystemDefaultDevice() else { return nil }
         let asset = MDLAsset()
         for anchor in meshAnchor {
             let mdlMesh = anchor.geometry.toMDLMesh(device: device, camera: camera, modelMatrix: anchor.transform)
@@ -63,19 +138,22 @@ class ExportViewModel: NSObject, ObservableObject, ARSessionDelegate {
         }
         return asset
     }
-    func export(asset: MDLAsset, fileName: String) throws {
+
+    /// Returns the saved file name including `.obj` extension.
+    @discardableResult
+    func export(asset: MDLAsset, fileName: String) throws -> String {
         guard let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            throw NSError(domain: "com.original.creatingLidarModel", code: 153)
+            throw NSError(domain: "com.igorgoncharenko.lidarscan", code: 153,
+                          userInfo: [NSLocalizedDescriptionKey: "Documents folder unavailable"])
         }
-        let folderName = "OBJ_FILES"
-        let folderURL = directory.appendingPathComponent(folderName)
-        try? FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true, attributes: nil)
-        let url = folderURL.appendingPathComponent("\(fileName.isEmpty ? UUID().uuidString : fileName).obj")
-        do {
-            try asset.export(to: url)
-            print("Object saved successfully at \(url)")
-        } catch {
-            print(error)
-        }
+        let folderURL = directory.appendingPathComponent("OBJ_FILES")
+        try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true)
+        let safeName = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let base = safeName.isEmpty ? UUID().uuidString : safeName
+        let finalName = base.hasSuffix(".obj") ? base : "\(base).obj"
+        let url = folderURL.appendingPathComponent(finalName)
+        try asset.export(to: url)
+        print("Saved scan: \(url.path)")
+        return finalName
     }
 }

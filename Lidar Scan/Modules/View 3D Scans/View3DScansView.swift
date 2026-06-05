@@ -74,6 +74,9 @@ struct View3DScansView: View {
             }.onAppear {
                 fetchFiles()
             }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                fetchFiles()
+            }
         }
     }
     func fetchFiles() {
