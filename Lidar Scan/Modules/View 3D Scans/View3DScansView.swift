@@ -99,7 +99,7 @@ struct View3DScansView: View {
     func displayFile(fileName: String) -> SCNScene {
         guard let documentsDirectory = FileManager.default.urls(
             for: .documentDirectory, in: .userDomainMask).first else {
-            fatalError("Failed to access Document Directory")
+            return SCNScene()
         }
         let folderName = "OBJ_FILES"
         let folderURL = documentsDirectory.appendingPathComponent(folderName)
@@ -111,7 +111,7 @@ struct View3DScansView: View {
     func removeFile(fileName: String) {
         guard let documentsDirectory = FileManager.default.urls(
             for: .documentDirectory, in: .userDomainMask).first else {
-            fatalError("Failed to access Document Directory")
+            return
         }
         let folderName = "OBJ_FILES"
         let folderURL = documentsDirectory.appendingPathComponent(folderName)
