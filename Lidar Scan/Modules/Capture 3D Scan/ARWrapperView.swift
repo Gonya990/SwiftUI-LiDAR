@@ -148,12 +148,31 @@ class ExportViewModel: NSObject, ObservableObject, ARSessionDelegate {
         }
         let folderURL = directory.appendingPathComponent("OBJ_FILES")
         try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true)
-        let safeName = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let base = safeName.isEmpty ? UUID().uuidString : safeName
-        let finalName = base.hasSuffix(".obj") ? base : "\(base).obj"
-        let url = folderURL.appendingPathComponent(finalName)
+        let url = uniqueExportURL(in: folderURL, requestedName: fileName)
         try asset.export(to: url)
         print("Saved scan: \(url.path)")
-        return finalName
+        return url.lastPathComponent
+    }
+
+    private func uniqueExportURL(in directory: URL, requestedName: String) -> URL {
+        let invalidCharacters = CharacterSet(charactersIn: "/\\:").union(.controlCharacters)
+        let trimmedName = requestedName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let sanitizedName = trimmedName.unicodeScalars.map { scalar in
+            invalidCharacters.contains(scalar) ? "-" : String(scalar)
+        }.joined()
+        let nameWithoutExtension = sanitizedName.lowercased().hasSuffix(".obj")
+            ? String(sanitizedName.dropLast(4))
+            : sanitizedName
+        let cleanBase = nameWithoutExtension
+            .trimmingCharacters(in: .whitespacesAndNewlines.union(CharacterSet(charactersIn: ".")))
+        let base = String((cleanBase.isEmpty ? UUID().uuidString : cleanBase).prefix(100))
+
+        var candidate = directory.appendingPathComponent("\(base).obj", isDirectory: false)
+        var suffix = 2
+        while FileManager.default.fileExists(atPath: candidate.path) {
+            candidate = directory.appendingPathComponent("\(base)-\(suffix).obj", isDirectory: false)
+            suffix += 1
+        }
+        return candidate
     }
 }
