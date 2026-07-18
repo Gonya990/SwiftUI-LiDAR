@@ -29,7 +29,9 @@ class AppDataModel: Identifiable {
         }
     }
 
-    static let minNumImages = 10
+    // Feature-poor household objects often fail with the sample's minimum of 10 images.
+    // Require a fuller orbit before offering on-device reconstruction.
+    static let minNumImages = 30
 
     /// Once we are headed to reconstruction portion, we will hold the session here.
     private(set) var photogrammetrySession: PhotogrammetrySession?

@@ -99,13 +99,13 @@ struct ARWrapperView: UIViewRepresentable {
 
         private func performExport(from arView: ARView) {
             guard let frame = arView.session.currentFrame else {
-                exportResult = .failed(message: "AR session not ready. Try again.")
+                exportResult = .failed(message: "AR-сеанс ещё не готов. Подождите несколько секунд и повторите.")
                 return
             }
 
             let meshAnchors = frame.anchors.compactMap { $0 as? ARMeshAnchor }
             guard !meshAnchors.isEmpty else {
-                exportResult = .failed(message: "No 3D mesh yet. Walk slowly around the object for 30–60 sec.")
+                exportResult = .failed(message: "3D-сетка ещё не построена. Медленно обойдите объект в течение 30–60 секунд.")
                 return
             }
 
@@ -114,7 +114,7 @@ struct ARWrapperView: UIViewRepresentable {
                 meshAnchor: meshAnchors,
                 camera: frame.camera
             ) else {
-                exportResult = .failed(message: "Could not build 3D model.")
+                exportResult = .failed(message: "Не удалось собрать 3D-модель из LiDAR-сетки.")
                 return
             }
 
@@ -144,7 +144,7 @@ class ExportViewModel: NSObject, ObservableObject, ARSessionDelegate {
     func export(asset: MDLAsset, fileName: String) throws -> URL {
         guard let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
             throw NSError(domain: "com.igorgoncharenko.lidarscan", code: 153,
-                          userInfo: [NSLocalizedDescriptionKey: "Documents folder unavailable"])
+                          userInfo: [NSLocalizedDescriptionKey: "Папка Documents недоступна"])
         }
         let folderURL = directory
             .appendingPathComponent("Scans", isDirectory: true)
@@ -162,7 +162,7 @@ class ExportViewModel: NSObject, ObservableObject, ARSessionDelegate {
             throw NSError(
                 domain: "com.igorgoncharenko.lidarscan",
                 code: 154,
-                userInfo: [NSLocalizedDescriptionKey: "OBJ export is unavailable on this device"]
+                userInfo: [NSLocalizedDescriptionKey: "Экспорт OBJ недоступен на этом устройстве"]
             )
         }
         try asset.export(to: url)

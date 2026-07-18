@@ -45,17 +45,14 @@ struct PrimaryView: View {
                     .interactiveDismissDisabled()
             }
         }
-        .alert(
-            "Failed:  " + (appModel.error != nil  ? "\(String(describing: appModel.error!))" : ""),
-            isPresented: $showErrorAlert,
-            actions: {
-                Button("OK") {
-                    logger.log("Calling restart...")
-                    appModel.state = .restart
-                }
-            },
-            message: {}
-        )
+        .alert("Сканирование остановлено", isPresented: $showErrorAlert) {
+            Button("Начать заново") {
+                logger.log("Calling restart...")
+                appModel.state = .restart
+            }
+        } message: {
+            Text("Проверьте освещение, держите предмет неподвижным и попробуйте ещё раз. Снятые фотографии остаются в папке Scans/Objects.")
+        }
     }
 }
 
@@ -75,4 +72,3 @@ private struct CircularProgressView: View {
         }
     }
 }
-

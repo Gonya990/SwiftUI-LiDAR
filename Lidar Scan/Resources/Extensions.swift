@@ -20,10 +20,10 @@ extension View {
         alert.addTextField { field in
             field.placeholder = hintText
         }
-        alert.addAction(.init(title: "Cancel", style: .cancel, handler: { _ in
+        alert.addAction(.init(title: "Отмена", style: .cancel, handler: { _ in
             secondaryAction()
         }))
-        alert.addAction(.init(title: "Save", style: .default, handler: { _ in
+        alert.addAction(.init(title: "Сохранить", style: .default, handler: { _ in
             if let text = alert.textFields?[0].text {
                 primaryAction(text)
             } else {

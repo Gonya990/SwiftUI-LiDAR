@@ -83,12 +83,12 @@ struct SceneViewWrapper: UIViewRepresentable {
             guard let hit = hits.first else { return }
             let position = hit.worldCoordinates
             // Show an alert to enter label
-            let alert = UIAlertController(title: "Add Tag", message: "Enter your label", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Добавить метку", message: "Введите подпись", preferredStyle: .alert)
             alert.addTextField { textField in
-                textField.placeholder = "Tag name"
+                textField.placeholder = "Название метки"
             }
-            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-            alert.addAction(UIAlertAction(title: "Add", style: .default, handler: { [weak self] _ in
+            alert.addAction(UIAlertAction(title: "Отмена", style: .cancel))
+            alert.addAction(UIAlertAction(title: "Добавить", style: .default, handler: { [weak self] _ in
                 guard let text = alert.textFields?.first?.text, !text.isEmpty else { return }
                 self?.addTag(at: position, with: text)
             }))

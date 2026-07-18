@@ -232,7 +232,7 @@ private struct CameraToggleButton: View {
             .background(.ultraThinMaterial.opacity(showShotLocations ? 1 : 0))
             .cornerRadius(15)
 
-            Text("Show capture positions")
+            Text("Показать позиции съёмки")
                 .font(.caption2)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

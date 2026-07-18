@@ -45,7 +45,7 @@ struct ReconstructionProgressView: View {
     @State private var processingStageDescription: String?
     @State private var pointCloud: PhotogrammetrySession.PointCloud?
     @State private var gotError: Bool = false
-    @State private var error: Error?
+    @State private var errorMessage = ""
     @State private var isCancelling: Bool = false
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -94,17 +94,14 @@ struct ReconstructionProgressView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.bottom, 20)
-        .alert(
-            "Failed:  " + (error != nil  ? "\(String(describing: error!))" : ""),
-            isPresented: $gotError,
-            actions: {
-                Button("OK") {
-                    logger.log("Calling restart...")
-                    appModel.state = .restart
-                }
-            },
-            message: {}
-        )
+        .alert("Не удалось создать 3D-модель", isPresented: $gotError) {
+            Button("Начать новый скан") {
+                logger.log("Calling restart after reconstruction failure...")
+                appModel.state = .restart
+            }
+        } message: {
+            Text(errorMessage)
+        }
         .task {
             precondition(appModel.state == .reconstructing)
             assert(appModel.photogrammetrySession != nil)
@@ -114,11 +111,19 @@ struct ReconstructionProgressView: View {
                 return
             }
 
+            let fileManager = FileManager.default
+            let temporaryOutput = outputFile.deletingLastPathComponent()
+                .appendingPathComponent(".model-\(UUID().uuidString).usdz")
+            try? fileManager.removeItem(at: temporaryOutput)
+
             let outputs = UntilProcessingCompleteFilter(input: session.outputs)
             do {
-                try session.process(requests: [.modelFile(url: outputFile)])
+                try session.process(requests: [.modelFile(url: temporaryOutput, detail: .reduced)])
             } catch {
-                logger.error("Processing the session failed!")
+                logger.error("Processing the session failed: \(String(describing: error))")
+                errorMessage = reconstructionErrorMessage(for: error)
+                gotError = true
+                return
             }
             for await output in outputs {
                 switch output {
@@ -146,12 +151,27 @@ struct ReconstructionProgressView: View {
                     case .requestError(_, let requestError):
                         if !isCancelling {
                             gotError = true
-                            error = requestError
+                            errorMessage = reconstructionErrorMessage(for: requestError)
+                            try? fileManager.removeItem(at: temporaryOutput)
                         }
                     case .processingComplete:
                         if !gotError {
-                            completed = true
-                            appModel.state = .viewing
+                            do {
+                                let values = try temporaryOutput.resourceValues(forKeys: [.fileSizeKey])
+                                guard (values.fileSize ?? 0) > 0 else {
+                                    throw CocoaError(.fileNoSuchFile)
+                                }
+                                if fileManager.fileExists(atPath: outputFile.path) {
+                                    try fileManager.removeItem(at: outputFile)
+                                }
+                                try fileManager.moveItem(at: temporaryOutput, to: outputFile)
+                                completed = true
+                                appModel.state = .viewing
+                            } catch {
+                                logger.error("Finalizing reconstructed model failed: \(String(describing: error))")
+                                errorMessage = reconstructionErrorMessage(for: error)
+                                gotError = true
+                            }
                         }
                     case .processingCancelled:
                         cancelled = true
@@ -166,6 +186,17 @@ struct ReconstructionProgressView: View {
             }
             logger.log("Reconstruction task exit")
         }  // task
+    }
+
+    private func reconstructionErrorMessage(for error: Error) -> String {
+        let rawError = String(reflecting: error).lowercased()
+        if rawError.contains("insufficientstorage") {
+            return "На iPhone недостаточно свободного места для временной реконструкции. Освободите не менее 1 ГБ и повторите. Исходные фотографии сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects."
+        }
+        if rawError.contains("processerror") || rawError.contains("filenosuchfile") {
+            return "RealityKit не смог сопоставить фотографии этого предмета. Исходники сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects. Для нового скана уберите сыпучие и движущиеся детали, не меняйте форму предмета, используйте матовый фон и сделайте три полных прохода при ровном свете."
+        }
+        return "Исходные фотографии сохранены и не потеряны. Освободите место, проверьте ровный свет и неподвижность предмета, затем начните новый скан."
     }
 
     struct LocalizedString {

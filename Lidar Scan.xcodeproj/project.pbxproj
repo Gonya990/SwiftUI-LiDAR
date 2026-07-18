@@ -102,8 +102,10 @@
 		CBE10BBD7F1403B9E7C89461 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		D0C218B2EB0851E397A187A4 /* HelpPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpPageView.swift; sourceTree = "<group>"; };
 		DCC9DCC3AD4B0EA7BBF1D24F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		DD516D20FF03416F958DEE03 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E4217B10359AFF0F3E78BBD6 /* ReconstructionPrimaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconstructionPrimaryView.swift; sourceTree = "<group>"; };
 		E5666ADBBDC6D1B115CBC691 /* ScanPasses-iPad-FixedHeight-2.mp4 */ = {isa = PBXFileReference; path = "ScanPasses-iPad-FixedHeight-2.mp4"; sourceTree = "<group>"; };
+		E64A2B7E36D07218884F7485 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		E6549379AEF6A272480A234F /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
 		E7FF709D0C8CA5A7CD041104 /* ScanPasses-iPhone-FixedHeight-3.mp4 */ = {isa = PBXFileReference; path = "ScanPasses-iPhone-FixedHeight-3.mp4"; sourceTree = "<group>"; };
 		EAD486F80557B288B9048355 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -171,6 +173,7 @@
 		4E193CBD3E501D8222A58142 /* Lidar Scan */ = {
 			isa = PBXGroup;
 			children = (
+				E64A2B7E36D07218884F7485 /* Info.plist */,
 				00B24D9C8BC8D672065F5C36 /* Lidar_Scan.entitlements */,
 				874C87C3A221DFEBC3D650F6 /* LidarScanApp.swift */,
 				ED55439B4192BF46115D4E10 /* StartView.swift */,
@@ -284,11 +287,12 @@
 				};
 			};
 			buildConfigurationList = 9065978409C8C59EBAD3C9B1 /* Build configuration list for PBXProject "Lidar Scan" */;
-			developmentRegion = en;
+			developmentRegion = ru;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
 				en,
+				ru,
 			);
 			mainGroup = FA7D37DBE259F3C5F88F55D3;
 			minimizedProjectReferenceProxies = 1;
@@ -378,6 +382,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				DCC9DCC3AD4B0EA7BBF1D24F /* en */,
+				DD516D20FF03416F958DEE03 /* ru */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -452,7 +457,7 @@
 				INFOPLIST_FILE = "Lidar Scan/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Igor G-LIDAR";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "The app would like to use your camera to scan your room using the LiDAR sensor.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Камера нужна для съёмки объекта или помещения и построения 3D‑модели с помощью LiDAR.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -540,7 +545,7 @@
 				INFOPLIST_FILE = "Lidar Scan/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Igor G-LIDAR";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "The app would like to use your camera to scan your room using the LiDAR sensor.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Камера нужна для съёмки объекта или помещения и построения 3D‑модели с помощью LiDAR.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (

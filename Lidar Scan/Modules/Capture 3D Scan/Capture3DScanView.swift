@@ -29,7 +29,7 @@ struct Capture3DScanView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("1. Медленно обходи объект / комнату (30–60 сек)")
                         Text("2. Белая сетка = LiDAR видит поверхности")
-                        Text("3. Когда сетка покроет объект — Export")
+                        Text("3. Когда сетка покроет объект — нажми «Экспортировать»")
                     }
                     .font(.footnote)
                     .padding(12)
@@ -49,7 +49,7 @@ struct Capture3DScanView: View {
 
                 HStack {
                     Button { mode.wrappedValue.dismiss() } label: {
-                        Text("Back")
+                        Text("Назад")
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
                             .background(Color.blue)
@@ -61,7 +61,7 @@ struct Capture3DScanView: View {
                 .padding(.horizontal, 24)
 
                 Button { beginExport() } label: {
-                    Text("Export 3D model")
+                    Text("Экспортировать 3D-модель")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue)
@@ -84,7 +84,7 @@ struct Capture3DScanView: View {
             case .failed(let message):
                 pauseSession = false
                 statusMessage = message
-                simpleAlert(title: "Export failed", message: message) {
+                simpleAlert(title: "Не удалось экспортировать", message: message) {
                     exportResult = .idle
                 }
             }
@@ -94,12 +94,12 @@ struct Capture3DScanView: View {
     private func beginExport() {
         pauseSession = true
         alertView(
-            title: "Save scan",
-            message: "Enter file name",
-            hintText: "kitchen-table"
+            title: "Сохранить скан",
+            message: "Введите имя файла",
+            hintText: "стол-на-кухне"
         ) { text in
             exportFileName = text
-            statusMessage = "Saving..."
+            statusMessage = "Сохранение…"
             exportTrigger += 1
         } secondaryAction: {
             pauseSession = false
@@ -125,7 +125,7 @@ struct Capture3DScanView: View {
 
     private func simpleAlert(title: String, message: String, onOk: @escaping () -> Void) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in onOk() })
+        alert.addAction(UIAlertAction(title: "Закрыть", style: .default) { _ in onOk() })
         rootController().present(alert, animated: true)
     }
 
