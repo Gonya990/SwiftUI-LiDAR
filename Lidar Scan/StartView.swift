@@ -7,9 +7,11 @@
 
 import SwiftUI
 import ARKit
+import RealityKit
 
 struct StartView: View {
     @State var shouldNavigateToScanView: Bool = false
+    @State var shouldNavigateToObjectScan: Bool = false
     @State var shouldNavigateToViewList: Bool = false
     func isLidarCapable() -> Bool {
         let supportLiDAR = ARWorldTrackingConfiguration.supportsSceneReconstruction(.mesh)
@@ -25,7 +27,7 @@ struct StartView: View {
                 VStack(spacing: 16) {
                     Text("LiDAR 3D Scanner")
                         .font(.title2.bold())
-                    Text("Сканирует комнату/объект в 3D-модель (.obj), не фото.")
+                    Text("Комнаты — быстрая LiDAR-сетка OBJ. Предметы — детальный текстурированный USDZ через Object Capture.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -34,7 +36,7 @@ struct StartView: View {
                     Button {
                         shouldNavigateToScanView = true
                     } label: {
-                        Text("Capture 3D Scan")
+                        Label("Сканировать комнату", systemImage: "viewfinder")
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.blue)
@@ -42,9 +44,26 @@ struct StartView: View {
                             .cornerRadius(10)
                     }
                     Button {
+                        shouldNavigateToObjectScan = true
+                    } label: {
+                        Label("Сканировать предмет", systemImage: "cube.transparent")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.indigo)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .disabled(!ObjectCaptureSession.isSupported)
+
+                    if !ObjectCaptureSession.isSupported {
+                        Text("Object Capture недоступен на этом устройстве.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Button {
                         shouldNavigateToViewList = true
                     } label: {
-                        Text("View 3D Scans")
+                        Label("Мои 3D-сканы", systemImage: "folder")
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.blue)
@@ -55,6 +74,11 @@ struct StartView: View {
                 .padding()
                 .navigationDestination(isPresented: $shouldNavigateToScanView) {
                     Capture3DScanView().navigationBarHidden(true)
+                }
+                .navigationDestination(isPresented: $shouldNavigateToObjectScan) {
+                    ContentView()
+                        .environment(AppDataModel.instance)
+                        .navigationBarHidden(true)
                 }
                 .navigationDestination(isPresented: $shouldNavigateToViewList) {
                     View3DScansView().navigationBarHidden(true)

@@ -77,13 +77,10 @@ struct Capture3DScanView: View {
             switch result {
             case .idle:
                 break
-            case .success(let fileName):
+            case .success(let fileURL):
                 pauseSession = false
-                statusMessage = "Saved: \(fileName)"
-                simpleAlert(title: "Saved", message: "\(fileName) — open View 3D Scans") {
-                    exportResult = .idle
-                    mode.wrappedValue.dismiss()
-                }
+                statusMessage = "Сохранено: \(fileURL.lastPathComponent)"
+                savedAlert(fileURL: fileURL)
             case .failed(let message):
                 pauseSession = false
                 statusMessage = message
@@ -95,6 +92,7 @@ struct Capture3DScanView: View {
     }
 
     private func beginExport() {
+        pauseSession = true
         alertView(
             title: "Save scan",
             message: "Enter file name",
@@ -103,7 +101,26 @@ struct Capture3DScanView: View {
             exportFileName = text
             statusMessage = "Saving..."
             exportTrigger += 1
-        } secondaryAction: {}
+        } secondaryAction: {
+            pauseSession = false
+        }
+    }
+
+    private func savedAlert(fileURL: URL) {
+        let alert = UIAlertController(
+            title: "3D-скан сохранён",
+            message: "Файл виден в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Rooms.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Поделиться / Сохранить в Файлы", style: .default) { _ in
+            let share = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+            self.rootController().present(share, animated: true)
+        })
+        alert.addAction(UIAlertAction(title: "Готово", style: .cancel) { _ in
+            exportResult = .idle
+            mode.wrappedValue.dismiss()
+        })
+        rootController().present(alert, animated: true)
     }
 
     private func simpleAlert(title: String, message: String, onOk: @escaping () -> Void) {

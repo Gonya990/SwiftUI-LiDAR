@@ -9,7 +9,7 @@ import ARKit
 
 enum ScanExportResult: Equatable {
     case idle
-    case success(fileName: String)
+    case success(fileURL: URL)
     case failed(message: String)
 }
 
@@ -119,8 +119,8 @@ struct ARWrapperView: UIViewRepresentable {
             }
 
             do {
-                let savedName = try viewModel.export(asset: asset, fileName: exportFileName)
-                exportResult = .success(fileName: savedName)
+                let savedURL = try viewModel.export(asset: asset, fileName: exportFileName)
+                exportResult = .success(fileURL: savedURL)
             } catch {
                 exportResult = .failed(message: error.localizedDescription)
             }
@@ -139,21 +139,48 @@ class ExportViewModel: NSObject, ObservableObject, ARSessionDelegate {
         return asset
     }
 
-    /// Returns the saved file name including `.obj` extension.
+    /// Returns the saved OBJ URL inside the app's Files-visible Documents folder.
     @discardableResult
-    func export(asset: MDLAsset, fileName: String) throws -> String {
+    func export(asset: MDLAsset, fileName: String) throws -> URL {
         guard let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
             throw NSError(domain: "com.igorgoncharenko.lidarscan", code: 153,
                           userInfo: [NSLocalizedDescriptionKey: "Documents folder unavailable"])
         }
-        let folderURL = directory.appendingPathComponent("OBJ_FILES")
+        let folderURL = directory
+            .appendingPathComponent("Scans", isDirectory: true)
+            .appendingPathComponent("Rooms", isDirectory: true)
         try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true)
-        let safeName = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let base = safeName.isEmpty ? UUID().uuidString : safeName
-        let finalName = base.hasSuffix(".obj") ? base : "\(base).obj"
-        let url = folderURL.appendingPathComponent(finalName)
+        let safeName = sanitizedFileName(fileName)
+        let base = safeName.isEmpty ? "scan-\(Self.timestamp.string(from: Date()))" : safeName
+        var finalName = base.hasSuffix(".obj") ? base : "\(base).obj"
+        var url = folderURL.appendingPathComponent(finalName)
+        if FileManager.default.fileExists(atPath: url.path) {
+            finalName = "\(base)-\(Self.timestamp.string(from: Date())).obj"
+            url = folderURL.appendingPathComponent(finalName)
+        }
+        guard MDLAsset.canExportFileExtension("obj") else {
+            throw NSError(
+                domain: "com.igorgoncharenko.lidarscan",
+                code: 154,
+                userInfo: [NSLocalizedDescriptionKey: "OBJ export is unavailable on this device"]
+            )
+        }
         try asset.export(to: url)
-        print("Saved scan: \(url.path)")
-        return finalName
+        return url
     }
+
+    private func sanitizedFileName(_ value: String) -> String {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_ "))
+        return trimmed.unicodeScalars
+            .map { allowed.contains($0) ? Character(String($0)) : "-" }
+            .reduce(into: "") { $0.append($1) }
+            .replacingOccurrences(of: " ", with: "-")
+    }
+
+    private static let timestamp: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd-HHmmss"
+        return formatter
+    }()
 }

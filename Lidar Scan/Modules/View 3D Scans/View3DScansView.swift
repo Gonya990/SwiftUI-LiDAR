@@ -2,126 +2,180 @@
 //  View3DScansView.swift
 //  Lidar Scan
 //
-//  Created by Cedan Misquith on 27/04/25.
-//
 
 import SwiftUI
-import SceneKit
 
-class CurrentlyDisplaying: ObservableObject {
-    @Published var fileName = ""
+private struct ScanFile: Identifiable {
+    let url: URL
+    let modifiedAt: Date
+    let size: Int64
+
+    var id: URL { url }
+    var name: String { url.lastPathComponent }
+    var kind: String { url.pathExtension.uppercased() }
+
+    func relativePath(from documentsDirectory: URL) -> String {
+        url.path.replacingOccurrences(of: documentsDirectory.path + "/", with: "")
+    }
 }
 
 struct View3DScansView: View {
-    @Environment(\.presentationMode) var mode: Binding<PresentationMode>
-    @StateObject private var viewModel = InspectViewModel()
-    @StateObject private var currentlyDispalying = CurrentlyDisplaying()
-    @State private var fileNames: [String] = []
-    @State private var fileName = ""
-    @State private var fullScreen = false
+    @Environment(\.presentationMode) private var mode: Binding<PresentationMode>
+    @State private var files: [ScanFile] = []
+    @State private var previewFile: ScanFile?
+    @State private var loadError = ""
+
     var body: some View {
-        NavigationView {
-            VStack {
-                ZStack {
-                    HStack {
-                        Button {
-                            self.mode.wrappedValue.dismiss()
-                        } label: {
-                            Image(systemName: "chevron.left")
-                                .foregroundColor(.primary)
-                            Text("Back").foregroundColor(.black)
-                        }
-                        Spacer()
-                    }
-                    .padding()
-                    Text("List of Scans")
+        VStack(spacing: 0) {
+            HStack {
+                Button {
+                    mode.wrappedValue.dismiss()
+                } label: {
+                    Label("Назад", systemImage: "chevron.left")
                 }
-                if fileNames.isEmpty {
-                    Spacer()
-                    let title = "Nothing to see here. There are no scans to display yet."
-                    let subtitle = "Please go to 'Capture 3D Scan' section to scan something."
-                    Text("\(title) \(subtitle)")
-                        .padding()
-                        .multilineTextAlignment(.center)
-                    Spacer()
-                } else {
-                    List(fileNames, id: \.self) { fileName in
-                        Button {
-                            self.currentlyDispalying.fileName = fileName
-                            self.fullScreen.toggle()
-                        } label: {
-                            Text(fileName)
+                Spacer()
+                Text("Мои 3D-сканы")
+                    .font(.headline)
+                Spacer()
+                Button {
+                    fetchFiles()
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .accessibilityLabel("Обновить")
+            }
+            .padding()
+
+            if files.isEmpty {
+                ContentUnavailableView(
+                    "Сканов пока нет",
+                    systemImage: "cube.transparent",
+                    description: Text(loadError.isEmpty
+                                      ? "Создайте скан комнаты или предмета."
+                                      : loadError)
+                )
+            } else {
+                List {
+                    ForEach(files) { file in
+                        VStack(alignment: .leading, spacing: 8) {
+                            Button {
+                                previewFile = file
+                            } label: {
+                                HStack {
+                                    Image(systemName: file.kind == "USDZ" ? "cube.fill" : "square.3.layers.3d")
+                                        .font(.title2)
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(file.name)
+                                            .font(.headline)
+                                        Text(fileDetails(file))
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "eye")
+                                }
+                            }
+                            .buttonStyle(.plain)
+
+                            ShareLink(item: file.url) {
+                                Label("Поделиться / Сохранить в Файлы", systemImage: "square.and.arrow.up")
+                                    .font(.subheadline)
+                            }
                         }
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive) {
-                                removeFile(fileName: fileName)
-                                withAnimation {
-                                    fetchFiles()
-                                }
+                                removeFile(file)
                             } label: {
-                                Label("Delete", systemImage: "trash")
+                                Label("Удалить", systemImage: "trash")
                             }
-                        }
-                    }.refreshable {
-                        fetchFiles()
-                    }
-                    .navigationDestination(isPresented: $fullScreen) {
-                        if !self.currentlyDispalying.fileName.isEmpty {
-                            SceneViewWrapper(scene: displayFile(fileName: self.currentlyDispalying.fileName))
                         }
                     }
                 }
-            }.onAppear {
-                fetchFiles()
+                .refreshable {
+                    fetchFiles()
+                }
             }
-            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-                fetchFiles()
+
+            Text("Также доступны в «Файлы» → «На моём iPhone» → «Igor G-LIDAR».")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding()
+        }
+        .navigationBarHidden(true)
+        .onAppear {
+            fetchFiles()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            fetchFiles()
+        }
+        .fullScreenCover(item: $previewFile) { file in
+            ModelView(modelFile: file.url) {
+                previewFile = nil
             }
+            .ignoresSafeArea()
         }
     }
-    func fetchFiles() {
-        guard let documentsDirectory = FileManager.default.urls(for: .documentDirectory,
-                                                                in: .userDomainMask).first else {
+
+    private var documentsDirectory: URL? {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+    }
+
+    private func fetchFiles() {
+        guard let documentsDirectory else {
+            loadError = "Папка Documents недоступна."
+            files = []
             return
         }
-        let folderName = "OBJ_FILES"
-        let folderURL = documentsDirectory.appendingPathComponent(folderName)
+
         do {
-            let fileURLs = try FileManager.default.contentsOfDirectory(at: folderURL, includingPropertiesForKeys: nil)
-            let filteredURLs = fileURLs.filter { (url) -> Bool in
-                return url.pathExtension == "obj"
+            try FileManager.default.createDirectory(
+                at: documentsDirectory.appendingPathComponent("Scans", isDirectory: true),
+                withIntermediateDirectories: true
+            )
+            guard let enumerator = FileManager.default.enumerator(
+                at: documentsDirectory,
+                includingPropertiesForKeys: [.contentModificationDateKey, .fileSizeKey],
+                options: [.skipsHiddenFiles, .skipsPackageDescendants]
+            ) else {
+                throw CocoaError(.fileReadUnknown)
             }
-            self.fileNames = filteredURLs.map { $0.lastPathComponent }
+
+            var discovered: [ScanFile] = []
+            for case let url as URL in enumerator {
+                guard ["obj", "usdz"].contains(url.pathExtension.lowercased()) else { continue }
+                let values = try url.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey])
+                discovered.append(
+                    ScanFile(
+                        url: url,
+                        modifiedAt: values.contentModificationDate ?? .distantPast,
+                        size: Int64(values.fileSize ?? 0)
+                    )
+                )
+            }
+            files = discovered.sorted { $0.modifiedAt > $1.modifiedAt }
+            loadError = ""
         } catch {
-            print("Error fetching files: \(error)")
+            files = []
+            loadError = "Не удалось прочитать сканы: \(error.localizedDescription)"
         }
     }
-    func displayFile(fileName: String) -> SCNScene {
-        guard let documentsDirectory = FileManager.default.urls(
-            for: .documentDirectory, in: .userDomainMask).first else {
-            fatalError("Failed to access Document Directory")
-        }
-        let folderName = "OBJ_FILES"
-        let folderURL = documentsDirectory.appendingPathComponent(folderName)
-        let fileURL = folderURL.appendingPathComponent(fileName)
-        print(fileURL)
-        let sceneView = try? SCNScene(url: fileURL)
-        return sceneView ?? SCNScene()
-    }
-    func removeFile(fileName: String) {
-        guard let documentsDirectory = FileManager.default.urls(
-            for: .documentDirectory, in: .userDomainMask).first else {
-            fatalError("Failed to access Document Directory")
-        }
-        let folderName = "OBJ_FILES"
-        let folderURL = documentsDirectory.appendingPathComponent(folderName)
-        let fileURL = folderURL.appendingPathComponent(fileName)
+
+    private func removeFile(_ file: ScanFile) {
         do {
-            try FileManager.default.removeItem(at: fileURL)
-            print("File Removed successfully: \(fileURL)")
+            try FileManager.default.removeItem(at: file.url)
+            fetchFiles()
         } catch {
-            print("Error removing file: \(error)")
+            loadError = "Не удалось удалить файл: \(error.localizedDescription)"
         }
+    }
+
+    private func fileDetails(_ file: ScanFile) -> String {
+        let size = ByteCountFormatter.string(fromByteCount: file.size, countStyle: .file)
+        guard let documentsDirectory else {
+            return "\(file.kind) · \(size)"
+        }
+        return "\(file.kind) · \(size) · \(file.relativePath(from: documentsDirectory))"
     }
 }
 
