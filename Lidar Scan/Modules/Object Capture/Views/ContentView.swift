@@ -18,9 +18,13 @@ struct ContentView: View {
         PrimaryView()
             .onAppear(perform: {
                 UIApplication.shared.isIdleTimerDisabled = true
+                if appModel.state == .notSet {
+                    appModel.state = .ready
+                }
             })
             .onDisappear(perform: {
                 UIApplication.shared.isIdleTimerDisabled = false
+                appModel.exitCaptureFlow()
             })
     }
 }

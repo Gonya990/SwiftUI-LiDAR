@@ -116,6 +116,31 @@ class AppDataModel: Identifiable {
         state = .completed
     }
 
+    /// Tears down capture when leaving the object-scan navigation flow.
+    func exitCaptureFlow() {
+        logger.log("exitCaptureFlow() called...")
+        if state == .ready || state == .capturing {
+            removeCaptureFolder()
+        }
+        objectCaptureSession?.cancel()
+        photogrammetrySession?.cancel()
+        photogrammetrySession = nil
+        objectCaptureSession = nil
+        captureFolderManager = nil
+        showOverlaySheets = false
+        orbit = .orbit1
+        isObjectFlipped = false
+        hasIndicatedObjectCannotBeFlipped = false
+        hasIndicatedFlipObjectAnyway = false
+        currentFeedback = []
+        messageList.removeAll()
+        captureMode = .object
+        isSaveDraftEnabled = false
+        tutorialPlayedOnce = false
+        error = nil
+        state = .notSet
+    }
+
     func removeCaptureFolder() {
         logger.log("Removing the capture folder...")
         guard let url = captureFolderManager?.captureFolder else { return }
@@ -261,6 +286,8 @@ extension AppDataModel {
         showOverlaySheets = false
         orbit = .orbit1
         isObjectFlipped = false
+        hasIndicatedObjectCannotBeFlipped = false
+        hasIndicatedFlipObjectAnyway = false
         currentFeedback = []
         messageList.removeAll()
         captureMode = .object
@@ -323,6 +350,7 @@ extension AppDataModel {
                     try startNewCapture()
                 } catch {
                     logger.error("Starting new capture failed!")
+                    switchToErrorState(error: error)
                 }
             case .prepareToReconstruct:
                 // Clean up the session to free GPU and memory resources.
