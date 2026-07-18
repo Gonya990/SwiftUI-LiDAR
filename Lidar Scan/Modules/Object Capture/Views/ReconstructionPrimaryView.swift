@@ -235,37 +235,37 @@ struct ReconstructionProgressView: View {
         static let failureTitle = NSLocalizedString(
             "Reconstruction failed title",
             bundle: Bundle.main,
-            value: "Не удалось создать 3D-модель",
+            value: "Couldn’t create the 3D model",
             comment: "Alert title shown when on-device reconstruction fails."
         )
         static let startNewScan = NSLocalizedString(
             "Start new scan after reconstruction failure",
             bundle: Bundle.main,
-            value: "Начать новый скан",
+            value: "Start a new scan",
             comment: "Button that restarts object capture after reconstruction fails."
         )
         static let insufficientStorage = NSLocalizedString(
             "Reconstruction insufficient storage",
             bundle: Bundle.main,
-            value: "На iPhone недостаточно свободного места для временной реконструкции. Освободите не менее 1 ГБ и повторите. Исходные фотографии сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects.",
+            value: "Your iPhone doesn’t have enough free space for reconstruction. Free at least 1 GB and try again. The source photos are saved in Files → On My iPhone → Igor G-LIDAR → Scans → Objects.",
             comment: "Actionable message for insufficient reconstruction storage."
         )
         static let imagesRejected = NSLocalizedString(
             "Reconstruction images rejected",
             bundle: Bundle.main,
-            value: "RealityKit не смог сопоставить фотографии этого предмета. Исходники сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects. Для нового скана уберите сыпучие и движущиеся детали, не меняйте форму предмета, используйте матовый фон и сделайте три полных прохода при ровном свете.",
+            value: "RealityKit couldn’t match this object’s photos. The source photos are saved in Files → On My iPhone → Igor G-LIDAR → Scans → Objects. For a new scan, remove loose or moving parts, keep the object unchanged, use a matte background, and make three full passes in even light.",
             comment: "Actionable message when captured images cannot form a model."
         )
         static let outputFailure = NSLocalizedString(
             "Reconstruction output failure",
             bundle: Bundle.main,
-            value: "Не удалось сохранить готовую 3D-модель. Исходные фотографии сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects. Проверьте свободное место и повторите обработку.",
+            value: "The finished 3D model couldn’t be saved. The source photos are saved in Files → On My iPhone → Igor G-LIDAR → Scans → Objects. Check free space and process the scan again.",
             comment: "Actionable message when a reconstructed model cannot be saved."
         )
         static let genericFailure = NSLocalizedString(
             "Reconstruction generic failure",
             bundle: Bundle.main,
-            value: "Исходные фотографии сохранены и не потеряны. Освободите место, проверьте ровный свет и неподвижность предмета, затем начните новый скан.",
+            value: "The source photos are saved and weren’t lost. Free some storage, check for even light and a still object, then start a new scan.",
             comment: "Fallback reconstruction failure message."
         )
         static let cancel = NSLocalizedString(

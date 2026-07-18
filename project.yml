@@ -1,6 +1,6 @@
 name: Lidar Scan
 options:
-  developmentLanguage: ru
+  developmentLanguage: en
   bundleIdPrefix: com.igorgoncharenko
   deploymentTarget:
     iOS: "18.0"

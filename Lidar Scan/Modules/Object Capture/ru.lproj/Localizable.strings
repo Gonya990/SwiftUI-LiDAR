@@ -109,6 +109,8 @@
 "Capture failed title" = "Сканирование остановлено";
 "Restart capture after failure" = "Начать заново";
 "Capture failed guidance" = "Проверьте освещение, держите предмет неподвижным и попробуйте ещё раз. Снятые фотографии остаются в папке Scans/Objects.";
+"Reconstruction setup failed title" = "Не удалось начать реконструкцию";
+"Reconstruction setup failed guidance" = "Снятые фотографии по-прежнему сохранены в Scans/Objects. Освободите не менее 1 ГБ, не закрывайте приложение и попробуйте обработать новый скан.";
 "Reconstruction failed title" = "Не удалось создать 3D-модель";
 "Start new scan after reconstruction failure" = "Начать новый скан";
 "Reconstruction insufficient storage" = "На iPhone недостаточно свободного места для временной реконструкции. Освободите не менее 1 ГБ и повторите. Исходные фотографии сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects.";

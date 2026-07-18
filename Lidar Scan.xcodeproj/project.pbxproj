@@ -287,7 +287,7 @@
 				};
 			};
 			buildConfigurationList = 9065978409C8C59EBAD3C9B1 /* Build configuration list for PBXProject "Lidar Scan" */;
-			developmentRegion = ru;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
