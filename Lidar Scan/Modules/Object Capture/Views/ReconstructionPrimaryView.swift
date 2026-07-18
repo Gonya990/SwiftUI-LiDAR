@@ -94,8 +94,8 @@ struct ReconstructionProgressView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.bottom, 20)
-        .alert("Не удалось создать 3D-модель", isPresented: $gotError) {
-            Button("Начать новый скан") {
+        .alert(LocalizedString.failureTitle, isPresented: $gotError) {
+            Button(LocalizedString.startNewScan) {
                 logger.log("Calling restart after reconstruction failure...")
                 appModel.state = .restart
             }
@@ -115,6 +115,11 @@ struct ReconstructionProgressView: View {
             let temporaryOutput = outputFile.deletingLastPathComponent()
                 .appendingPathComponent(".model-\(UUID().uuidString).usdz")
             try? fileManager.removeItem(at: temporaryOutput)
+            defer {
+                // A successful promotion moves this file, so this is a no-op on success.
+                // On every failure/cancellation path it prevents stale USDZ files accumulating.
+                try? fileManager.removeItem(at: temporaryOutput)
+            }
 
             let outputs = UntilProcessingCompleteFilter(input: session.outputs)
             do {
@@ -150,9 +155,8 @@ struct ReconstructionProgressView: View {
                         }
                     case .requestError(_, let requestError):
                         if !isCancelling {
+                            errorMessage = reconstructionErrorMessage(for: requestError, requestFailed: true)
                             gotError = true
-                            errorMessage = reconstructionErrorMessage(for: requestError)
-                            try? fileManager.removeItem(at: temporaryOutput)
                         }
                     case .processingComplete:
                         if !gotError {
@@ -161,10 +165,11 @@ struct ReconstructionProgressView: View {
                                 guard (values.fileSize ?? 0) > 0 else {
                                     throw CocoaError(.fileNoSuchFile)
                                 }
-                                if fileManager.fileExists(atPath: outputFile.path) {
-                                    try fileManager.removeItem(at: outputFile)
-                                }
-                                try fileManager.moveItem(at: temporaryOutput, to: outputFile)
+                                try promoteReconstructedModel(
+                                    from: temporaryOutput,
+                                    to: outputFile,
+                                    fileManager: fileManager
+                                )
                                 completed = true
                                 appModel.state = .viewing
                             } catch {
@@ -188,18 +193,81 @@ struct ReconstructionProgressView: View {
         }  // task
     }
 
-    private func reconstructionErrorMessage(for error: Error) -> String {
-        let rawError = String(reflecting: error).lowercased()
-        if rawError.contains("insufficientstorage") {
-            return "На iPhone недостаточно свободного места для временной реконструкции. Освободите не менее 1 ГБ и повторите. Исходные фотографии сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects."
+    private func promoteReconstructedModel(
+        from temporaryOutput: URL,
+        to outputFile: URL,
+        fileManager: FileManager
+    ) throws {
+        if fileManager.fileExists(atPath: outputFile.path) {
+            // replaceItem is atomic on the same volume and preserves the previous model
+            // if promotion of the new model fails.
+            _ = try fileManager.replaceItemAt(outputFile, withItemAt: temporaryOutput)
+        } else {
+            // replaceItem requires an existing destination; the first export must use move.
+            try fileManager.moveItem(at: temporaryOutput, to: outputFile)
         }
-        if rawError.contains("processerror") || rawError.contains("filenosuchfile") {
-            return "RealityKit не смог сопоставить фотографии этого предмета. Исходники сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects. Для нового скана уберите сыпучие и движущиеся детали, не меняйте форму предмета, используйте матовый фон и сделайте три полных прохода при ровном свете."
+    }
+
+    private func reconstructionErrorMessage(for error: Error, requestFailed: Bool = false) -> String {
+        if let sessionError = error as? PhotogrammetrySession.Error {
+            switch sessionError {
+                case .insufficientStorage:
+                    return LocalizedString.insufficientStorage
+                case .invalidImages:
+                    return LocalizedString.imagesRejected
+                case .invalidOutput:
+                    return LocalizedString.outputFailure
+                @unknown default:
+                    return requestFailed ? LocalizedString.imagesRejected : LocalizedString.genericFailure
+            }
         }
-        return "Исходные фотографии сохранены и не потеряны. Освободите место, проверьте ровный свет и неподвижность предмета, затем начните новый скан."
+
+        if let cocoaError = error as? CocoaError, cocoaError.code == .fileNoSuchFile {
+            return LocalizedString.outputFailure
+        }
+
+        // RealityKit exposes some reconstruction failures only as an opaque request Error.
+        // The stage is reliable even when its private error text or type changes.
+        return requestFailed ? LocalizedString.imagesRejected : LocalizedString.genericFailure
     }
 
     struct LocalizedString {
+        static let failureTitle = NSLocalizedString(
+            "Reconstruction failed title",
+            bundle: Bundle.main,
+            value: "Не удалось создать 3D-модель",
+            comment: "Alert title shown when on-device reconstruction fails."
+        )
+        static let startNewScan = NSLocalizedString(
+            "Start new scan after reconstruction failure",
+            bundle: Bundle.main,
+            value: "Начать новый скан",
+            comment: "Button that restarts object capture after reconstruction fails."
+        )
+        static let insufficientStorage = NSLocalizedString(
+            "Reconstruction insufficient storage",
+            bundle: Bundle.main,
+            value: "На iPhone недостаточно свободного места для временной реконструкции. Освободите не менее 1 ГБ и повторите. Исходные фотографии сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects.",
+            comment: "Actionable message for insufficient reconstruction storage."
+        )
+        static let imagesRejected = NSLocalizedString(
+            "Reconstruction images rejected",
+            bundle: Bundle.main,
+            value: "RealityKit не смог сопоставить фотографии этого предмета. Исходники сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects. Для нового скана уберите сыпучие и движущиеся детали, не меняйте форму предмета, используйте матовый фон и сделайте три полных прохода при ровном свете.",
+            comment: "Actionable message when captured images cannot form a model."
+        )
+        static let outputFailure = NSLocalizedString(
+            "Reconstruction output failure",
+            bundle: Bundle.main,
+            value: "Не удалось сохранить готовую 3D-модель. Исходные фотографии сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects. Проверьте свободное место и повторите обработку.",
+            comment: "Actionable message when a reconstructed model cannot be saved."
+        )
+        static let genericFailure = NSLocalizedString(
+            "Reconstruction generic failure",
+            bundle: Bundle.main,
+            value: "Исходные фотографии сохранены и не потеряны. Освободите место, проверьте ровный свет и неподвижность предмета, затем начните новый скан.",
+            comment: "Fallback reconstruction failure message."
+        )
         static let cancel = NSLocalizedString(
             "Cancel (Object Reconstruction)",
             bundle: Bundle.main,

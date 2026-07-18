@@ -106,3 +106,12 @@
 "You need at least <min num of images> images of your object to create a model. (Review, Object Capture)" = "Для создания модели нужно не менее %d снимков предмета.";
 "Your object may have single color surfaces or be too reflective to add more segments. Tap Continue to capture more detail without flipping, or Flip Object Anyway. (Review, Object Capture)" = "Однотонная или блестящая поверхность может мешать сканированию. Нажмите «Продолжить», чтобы добавить детали без переворота, или выберите «Всё равно перевернуть».";
 "Look at your subject." = "Наведите камеру на объект.";
+"Capture failed title" = "Сканирование остановлено";
+"Restart capture after failure" = "Начать заново";
+"Capture failed guidance" = "Проверьте освещение, держите предмет неподвижным и попробуйте ещё раз. Снятые фотографии остаются в папке Scans/Objects.";
+"Reconstruction failed title" = "Не удалось создать 3D-модель";
+"Start new scan after reconstruction failure" = "Начать новый скан";
+"Reconstruction insufficient storage" = "На iPhone недостаточно свободного места для временной реконструкции. Освободите не менее 1 ГБ и повторите. Исходные фотографии сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects.";
+"Reconstruction images rejected" = "RealityKit не смог сопоставить фотографии этого предмета. Исходники сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects. Для нового скана уберите сыпучие и движущиеся детали, не меняйте форму предмета, используйте матовый фон и сделайте три полных прохода при ровном свете.";
+"Reconstruction output failure" = "Не удалось сохранить готовую 3D-модель. Исходные фотографии сохранены в «Файлы» → «На моём iPhone» → «Igor G-LIDAR» → Scans → Objects. Проверьте свободное место и повторите обработку.";
+"Reconstruction generic failure" = "Исходные фотографии сохранены и не потеряны. Освободите место, проверьте ровный свет и неподвижность предмета, затем начните новый скан.";

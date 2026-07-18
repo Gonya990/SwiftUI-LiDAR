@@ -45,14 +45,35 @@ struct PrimaryView: View {
                     .interactiveDismissDisabled()
             }
         }
-        .alert("Сканирование остановлено", isPresented: $showErrorAlert) {
-            Button("Начать заново") {
+        .alert(LocalizedString.failureTitle, isPresented: $showErrorAlert) {
+            Button(LocalizedString.restart) {
                 logger.log("Calling restart...")
                 appModel.state = .restart
             }
         } message: {
-            Text("Проверьте освещение, держите предмет неподвижным и попробуйте ещё раз. Снятые фотографии остаются в папке Scans/Objects.")
+            Text(LocalizedString.failureMessage)
         }
+    }
+
+    private enum LocalizedString {
+        static let failureTitle = NSLocalizedString(
+            "Capture failed title",
+            bundle: Bundle.main,
+            value: "Сканирование остановлено",
+            comment: "Alert title shown when object capture fails."
+        )
+        static let restart = NSLocalizedString(
+            "Restart capture after failure",
+            bundle: Bundle.main,
+            value: "Начать заново",
+            comment: "Button that restarts object capture after a failure."
+        )
+        static let failureMessage = NSLocalizedString(
+            "Capture failed guidance",
+            bundle: Bundle.main,
+            value: "Проверьте освещение, держите предмет неподвижным и попробуйте ещё раз. Снятые фотографии остаются в папке Scans/Objects.",
+            comment: "Actionable guidance after object capture fails."
+        )
     }
 }
 
