@@ -29,7 +29,9 @@ class AppDataModel: Identifiable {
         }
     }
 
-    static let minNumImages = 10
+    // Feature-poor household objects often fail with the sample's minimum of 10 images.
+    // Require a fuller orbit before offering on-device reconstruction.
+    static let minNumImages = 30
 
     /// Once we are headed to reconstruction portion, we will hold the session here.
     private(set) var photogrammetrySession: PhotogrammetrySession?
@@ -52,6 +54,11 @@ class AppDataModel: Identifiable {
         case completed
         case restart
         case failed
+    }
+
+    enum FailureContext {
+        case capture
+        case reconstruction
     }
 
     var state: ModelState = .notSet {
@@ -84,6 +91,7 @@ class AppDataModel: Identifiable {
 
     // When state moves to failed, this is the error causing it.
     private(set) var error: Swift.Error?
+    private(set) var failureContext: FailureContext = .capture
 
     // Use setShowOverlaySheets(to:) to change this so you can maintain ObjectCaptureSession's pause state
     // properly because you don't hide the ObjectCaptureView. If you hide the ObjectCaptureView it pauses automatically.
@@ -219,15 +227,16 @@ extension AppDataModel {
 
         if case let .failed(error) = session.state {
             logger.error("Got error starting session! \(String(describing: error))")
-            switchToErrorState(error: error)
+            switchToErrorState(error: error, context: .capture)
         } else {
             state = .capturing
         }
     }
 
-    private func switchToErrorState(error inError: Swift.Error) {
+    private func switchToErrorState(error inError: Swift.Error, context: FailureContext) {
         // Set the error first since the transitions will assume it is non-nil!
         error = inError
+        failureContext = context
         state = .failed
     }
 
@@ -267,6 +276,7 @@ extension AppDataModel {
         state = .ready
         isSaveDraftEnabled = false
         tutorialPlayedOnce = false
+        failureContext = .capture
     }
 
     private func onStateChanged(newState: ObjectCaptureSession.CaptureState) {
@@ -285,7 +295,7 @@ extension AppDataModel {
             if case ObjectCaptureSession.Error.cancelled = error {
                 state = .restart
             } else {
-                switchToErrorState(error: error)
+                switchToErrorState(error: error, context: .capture)
             }
         }
     }
@@ -331,7 +341,7 @@ extension AppDataModel {
                     try startReconstruction()
                 } catch {
                     logger.error("Reconstructing failed!")
-                    switchToErrorState(error: error)
+                    switchToErrorState(error: error, context: .reconstruction)
                 }
             case .restart, .completed:
                 reset()

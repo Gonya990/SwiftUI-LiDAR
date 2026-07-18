@@ -404,7 +404,7 @@ private struct AutoCaptureToggle: View {
                         .frame(width: 15)
                         .foregroundStyle(.black)
                 }
-                Text("Auto")
+                Text("Авто")
                     .font(.footnote)
                     .foregroundStyle(.black)
             }

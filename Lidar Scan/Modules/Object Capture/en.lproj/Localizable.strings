@@ -327,3 +327,15 @@ Localizable String file.
 /* Feedback that this object is likely to fail if flipped. */
 "Your object may have single color surfaces or be too reflective to add more segments. Tap Continue to capture more detail without flipping, or Flip Object Anyway. (Review, Object Capture)" = "Your object may have single color surfaces or be too reflective to add more segments. Tap Continue to capture more detail without flipping, or Flip Object Anyway.";
 
+/* Failure recovery added by Igor G-LIDAR. */
+"Capture failed title" = "Capture stopped";
+"Restart capture after failure" = "Start again";
+"Capture failed guidance" = "Check the lighting, keep the object still, and try again. Captured photos remain in the Scans/Objects folder.";
+"Reconstruction setup failed title" = "Couldn’t start reconstruction";
+"Reconstruction setup failed guidance" = "The captured photos are still saved in Scans/Objects. Free at least 1 GB of storage, keep the app open, and try processing a new scan.";
+"Reconstruction failed title" = "Couldn’t create the 3D model";
+"Start new scan after reconstruction failure" = "Start a new scan";
+"Reconstruction insufficient storage" = "Your iPhone doesn’t have enough free space for reconstruction. Free at least 1 GB and try again. The source photos are saved in Files → On My iPhone → Igor G-LIDAR → Scans → Objects.";
+"Reconstruction images rejected" = "RealityKit couldn’t match this object’s photos. The source photos are saved in Files → On My iPhone → Igor G-LIDAR → Scans → Objects. For a new scan, remove loose or moving parts, keep the object unchanged, use a matte background, and make three full passes in even light.";
+"Reconstruction output failure" = "The finished 3D model couldn’t be saved. The source photos are saved in Files → On My iPhone → Igor G-LIDAR → Scans → Objects. Check free space and process the scan again.";
+"Reconstruction generic failure" = "The source photos are saved and weren’t lost. Free some storage, check for even light and a still object, then start a new scan.";

@@ -25,7 +25,7 @@ struct StartView: View {
         NavigationStack {
             if  isLidarCapable() {
                 VStack(spacing: 16) {
-                    Text("LiDAR 3D Scanner")
+                    Text("LiDAR 3D-сканер")
                         .font(.title2.bold())
                     Text("Комнаты — быстрая LiDAR-сетка OBJ. Предметы — детальный текстурированный USDZ через Object Capture.")
                         .font(.footnote)
@@ -55,8 +55,14 @@ struct StartView: View {
                     }
                     .disabled(!ObjectCaptureSession.isSupported)
 
+                    Text("Перед сканированием предмета уберите сыпучие и движущиеся детали. Предмет должен оставаться неподвижным и неизменным; лучше всего подходят матовые поверхности с заметной текстурой и ровный рассеянный свет.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+
                     if !ObjectCaptureSession.isSupported {
-                        Text("Object Capture недоступен на этом устройстве.")
+                        Text("Сканирование предметов недоступно на этом устройстве.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -85,7 +91,7 @@ struct StartView: View {
                 }
             } else {
                 VStack(alignment: .center) {
-                    Text("This Device is not capable of a 3D scan, as it is missing the Lidar Sensor.")
+                    Text("На этом устройстве нет датчика LiDAR, поэтому 3D-сканирование недоступно.")
                         .multilineTextAlignment(.center)
                 }
             }
