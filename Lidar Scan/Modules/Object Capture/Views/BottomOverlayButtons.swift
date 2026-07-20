@@ -103,7 +103,16 @@ private struct CaptureButton: View {
     private func performAction() {
         if session.state == .ready {
             // Always detect a single object bounding box before capturing.
-            hasDetectionFailed = !(session.startDetecting())
+            let started = session.startDetecting()
+            if started {
+                hasDetectionFailed = false
+            } else {
+                // Session can briefly refuse detection right after becoming ready; retry once.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    let retried = session.startDetecting()
+                    hasDetectionFailed = !retried
+                }
+            }
         } else if case .detecting = session.state {
             session.startCapturing()
         }

@@ -32,6 +32,7 @@
 		659DFA8748C96F6A7154F000 /* StartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED55439B4192BF46115D4E10 /* StartView.swift */; };
 		673AA47F9DEEC6DD958B864B /* ScanPasses-iPhone-FixedHeight-unflippable-low.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 6E9CCC43B4CEEE49393CE089 /* ScanPasses-iPhone-FixedHeight-unflippable-low.mp4 */; };
 		6A659E33009A9D25004E45B7 /* ARWrapperView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F076E295924EB7D6F4638974 /* ARWrapperView.swift */; };
+		71804E880A3844E48A7ECE0E /* ObjScanPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE84DD85C7183E81BB599A8C /* ObjScanPreviewView.swift */; };
 		7E289A18F159A90E00442324 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6F6A996374C65A24996A228E /* Assets.xcassets */; };
 		96609BA6ED6929AF58E3D650 /* ScanPasses-iPad-FixedHeight-unflippable-high.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = F9A1C6C071706349F55E4626 /* ScanPasses-iPad-FixedHeight-unflippable-high.mp4 */; };
 		9B3136ADFCB6D1983CBDD112 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE10BBD7F1403B9E7C89461 /* Extensions.swift */; };
@@ -96,6 +97,7 @@
 		93B062279D9484927935F514 /* TutorialPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialPageView.swift; sourceTree = "<group>"; };
 		9A094696BD4F335C73313DB9 /* ScanTutorial-iPad-Area.mp4 */ = {isa = PBXFileReference; path = "ScanTutorial-iPad-Area.mp4"; sourceTree = "<group>"; };
 		9A9F03DEB53C22FBDBF85C57 /* TimedMessageList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimedMessageList.swift; sourceTree = "<group>"; };
+		AE84DD85C7183E81BB599A8C /* ObjScanPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjScanPreviewView.swift; sourceTree = "<group>"; };
 		B42481C47895E541A7E72CA7 /* OnboardingStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStateMachine.swift; sourceTree = "<group>"; };
 		BE736627EC13EB782578605E /* Lidar Scan.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Lidar Scan.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6385C9F46C9D7E81B659607 /* FeedbackMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackMessages.swift; sourceTree = "<group>"; };
@@ -141,6 +143,7 @@
 		2F40B44F9D5C67FDEE8ABD54 /* View 3D Scans */ = {
 			isa = PBXGroup;
 			children = (
+				AE84DD85C7183E81BB599A8C /* ObjScanPreviewView.swift */,
 				7E07026C3A5C25BE8777DC0E /* SceneViewWrapper.swift */,
 				0EAC7A213A908685E54C791B /* View3DScansView.swift */,
 				F67279BEA25523B59A67A364 /* View3DScanViewModel.swift */,
@@ -353,6 +356,7 @@
 				E293DD0429A45229021C6D38 /* HelpPageView.swift in Sources */,
 				C78201B3284A6C4DDE44D8A1 /* LidarScanApp.swift in Sources */,
 				A1278BDCDA4A8F3E6C958502 /* ModelView.swift in Sources */,
+				71804E880A3844E48A7ECE0E /* ObjScanPreviewView.swift in Sources */,
 				D1393FD85DDD2A32A4FDC587 /* OnboardingButtonView+LocalizedString.swift in Sources */,
 				25380AEE54802E4E4D22844B /* OnboardingButtonView.swift in Sources */,
 				C8EC0FF63493C93B36A8CE4B /* OnboardingStateMachine.swift in Sources */,
@@ -458,6 +462,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Igor G-LIDAR";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Камера нужна для съёмки объекта или помещения и построения 3D‑модели с помощью LiDAR.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Геолокация используется только для компаса (север), чтобы стабильнее ориентировать 3D‑скан в пространстве.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Датчики движения (гироскоп и акселерометр) нужны, чтобы точно отслеживать положение iPhone в пространстве при 3D‑сканировании.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -546,6 +552,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Igor G-LIDAR";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Камера нужна для съёмки объекта или помещения и построения 3D‑модели с помощью LiDAR.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Геолокация используется только для компаса (север), чтобы стабильнее ориентировать 3D‑скан в пространстве.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Датчики движения (гироскоп и акселерометр) нужны, чтобы точно отслеживать положение iPhone в пространстве при 3D‑сканировании.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (

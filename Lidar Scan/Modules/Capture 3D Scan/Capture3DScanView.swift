@@ -52,6 +52,10 @@ struct Capture3DScanView: View {
                     .cornerRadius(8)
                     .padding(.horizontal)
 
+                Text("Визуализация: LiDAR-сетка")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
                 if !statusMessage.isEmpty {
                     Text(statusMessage)
                         .font(.footnote)

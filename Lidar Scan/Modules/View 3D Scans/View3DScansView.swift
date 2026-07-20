@@ -110,8 +110,16 @@ struct View3DScansView: View {
             fetchFiles()
         }
         .fullScreenCover(item: $previewFile) { file in
-            ModelView(modelFile: file.url) {
-                previewFile = nil
+            Group {
+                if file.url.pathExtension.lowercased() == "obj" {
+                    ObjScanPreviewView(fileURL: file.url) {
+                        previewFile = nil
+                    }
+                } else {
+                    ModelView(modelFile: file.url) {
+                        previewFile = nil
+                    }
+                }
             }
             .ignoresSafeArea()
         }

@@ -24,6 +24,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.igorgoncharenko.lidarscan
         INFOPLIST_KEY_CFBundleDisplayName: "Igor G-LIDAR"
         INFOPLIST_KEY_NSCameraUsageDescription: "Камера нужна для съёмки объекта или помещения и построения 3D‑модели с помощью LiDAR."
+        INFOPLIST_KEY_NSMotionUsageDescription: "Датчики движения (гироскоп и акселерометр) нужны, чтобы точно отслеживать положение iPhone в пространстве при 3D‑сканировании."
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Геолокация используется только для компаса (север), чтобы стабильнее ориентировать 3D‑скан в пространстве."
         INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
