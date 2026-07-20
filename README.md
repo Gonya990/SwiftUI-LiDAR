@@ -1,70 +1,53 @@
-# LiDAR 3D Scanner for iOS (SwiftUI + ARKit)
+# Lidar Scan (Igor G-LIDAR)
 
-A SwiftUI-based iOS app that leverages Apple's LiDAR sensors and ARKit to scan real-world environments, generate a detailed 3D mesh, and export it as a .OBJ file for 3D preview, analysis, or further processing.
+SwiftUI + ARKit iOS app for LiDAR room meshes and Object Capture models. Built with [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`project.yml`).
 
-## ✨ Features
+**Bundle ID:** `com.igorgoncharenko.lidarscan`  
+**Display name:** Igor G-LIDAR  
+**Product name:** Lidar Scan IGORAN
 
--   Real-time environment scanning using LiDAR sensors (iPhone / iPad Pro).
-    
--   Mesh generation with detailed depth mapping and surface reconstruction.
-    
--   Export 3D mesh as a standard `.OBJ` file.
-    
--   Preview scanned models with pan, zoom, and rotate controls in an ARKit scene.
-    
--   Smooth SwiftUI interface integrated with ARKit rendering.
-    
+## Features
 
-## 📱 Requirements
+- **Room scan (OBJ)** — fast LiDAR mesh of a space, export as `.obj`
+- **Object Capture (USDZ)** — guided multi-pass capture of a physical object into a textured `.usdz`
+- **Library** — browse saved scans, share via the system share sheet / Files, delete locally
+- Scans live under **Files → On My iPhone → Igor G-LIDAR**
 
--   iOS 16.0+
-    
--   Xcode 15+
-    
--   Device with LiDAR sensor (e.g., iPhone 12 Pro, 13 Pro, 14 Pro, or iPad Pro).
-    
+## Requirements
 
-## 🚀 Getting Started
+- iOS 18.0+
+- Xcode 16+ (with iOS 18 SDK)
+- Physical device with a LiDAR sensor (iPhone Pro / iPad Pro)
+- **Simulator is not supported** (ARKit LiDAR + Object Capture require hardware)
 
-1.  Clone the repository:
+## Getting started
 
-    `git clone https://github.com/cedanmisquith/SwiftLiDAR` 
-    
-3.  Open the project in Xcode.
-    
-4.  Build and run on a physical device with a LiDAR sensor (simulator not supported).
-    
+```bash
+git clone https://github.com/Gonya990/SwiftUI-LiDAR.git
+cd SwiftUI-LiDAR
+brew install xcodegen   # if needed
+xcodegen generate
+open "Lidar Scan.xcodeproj"
+```
 
-## 🛠️ Tech Stack
+Select a physical LiDAR device and run the **Lidar Scan** scheme.
 
--   SwiftUI
-    
--   ARKit
-    
--   RealityKit
-    
--   SceneKit (.OBJ file handling)
+## Deploy to iPhone
 
-## 🎥 Screen Recordings
-3D Scanning               |  View Scans
-:-------------------------:|:-------------------------:
-![](https://github.com/cedanmisquith/SwiftLiDAR/blob/main/Screenshots/Capture%203D%20Scan.gif)   |   ![](https://github.com/cedanmisquith/SwiftLiDAR/blob/main/Screenshots/View%203D%20Scan.gif)
+```bash
+# Optional overrides if your UDID / CoreDevice UUID differ:
+# export IOS_DEVICE_ID=00008130-...
+# export IOS_CORE_DEVICE=E2386A00-...
+./scripts/deploy-iphone.sh
+```
 
-## 📸 Screenshots
+The script regenerates a bloated Xcode project if needed, builds for device, installs, and launches `com.igorgoncharenko.lidarscan`. Unlock the phone (passcode) before install.
 
-3D Scanning               |  View Scans
-:-------------------------:|:-------------------------:
-![](https://github.com/cedanmisquith/SwiftLiDAR/blob/main/Screenshots/3D%20Scanning.PNG)  |  ![](https://github.com/cedanmisquith/SwiftLiDAR/blob/main/Screenshots/View%203D%20Scan%20.PNG)
+## Tech stack
 
-## 🧠 Inspiration
+- SwiftUI, ARKit, RealityKit, SceneKit
+- Apple Object Capture sample code (see `APPLE_OBJECT_CAPTURE_SAMPLE_LICENSE.txt`)
 
-Built as a lightweight tool to quickly capture and explore 3D spaces, intended for developers, hobbyists, 3D artists, and AR enthusiasts.
-
-Adapted from the [repository](https://github.com/kelvinjou/VirtualShowrooms) created by [kelvinjou](https://github.com/kelvinjou). You can also follow through the tutorials posted on the [YouTube](https://www.youtube.com/@kelvinjou-dev/videos) channel.
-
-- [Part 1](https://www.youtube.com/watch?v=At6zjsxh9AY)
-- [Part 2](https://www.youtube.com/watch?v=6NP3sHAxMz8&t)
-
-## 📄 License
+## License
 
 MIT License
