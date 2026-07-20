@@ -13,6 +13,7 @@ struct Capture3DScanView: View {
     @State private var pauseSession = false
     @State private var showHint = true
     @State private var statusMessage = ""
+    @State private var meshAnchorCount = 0
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -20,16 +21,17 @@ struct Capture3DScanView: View {
                 exportTrigger: $exportTrigger,
                 exportFileName: $exportFileName,
                 exportResult: $exportResult,
-                pauseSession: $pauseSession
+                pauseSession: $pauseSession,
+                meshAnchorCount: $meshAnchorCount
             )
             .ignoresSafeArea()
 
             VStack(spacing: 12) {
                 if showHint {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("1. Медленно обходи объект / комнату (30–60 сек)")
-                        Text("2. Белая сетка = LiDAR видит поверхности")
-                        Text("3. Когда сетка покроет объект — нажми «Экспортировать»")
+                        Text("1. Медленно обойди комнату (30–60 сек)")
+                        Text("2. Голубая сетка = LiDAR видит поверхности")
+                        Text("3. Когда сетка покроет нужную зону — нажми «Экспортировать»")
                     }
                     .font(.footnote)
                     .padding(12)
@@ -39,6 +41,16 @@ struct Capture3DScanView: View {
                     .padding(.horizontal)
                     .onTapGesture { showHint = false }
                 }
+
+                Text(meshStatusText)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(meshAnchorCount > 0 ? Color.cyan : Color.secondary)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 6)
+                    .frame(maxWidth: .infinity)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(8)
+                    .padding(.horizontal)
 
                 if !statusMessage.isEmpty {
                     Text(statusMessage)
@@ -64,15 +76,19 @@ struct Capture3DScanView: View {
                     Text("Экспортировать 3D-модель")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
+                        .background(meshAnchorCount > 0 ? Color.blue : Color.gray)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
+                .disabled(meshAnchorCount == 0 && exportResult == .idle)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
             }
         }
         .navigationBarHidden(true)
+        .onDisappear {
+            pauseSession = true
+        }
         .onChange(of: exportResult) { result in
             switch result {
             case .idle:
@@ -91,15 +107,23 @@ struct Capture3DScanView: View {
         }
     }
 
+    private var meshStatusText: String {
+        if meshAnchorCount == 0 {
+            return "LiDAR: сетка ещё не появилась — медленно води камеру по поверхностям"
+        }
+        return "LiDAR: фрагментов сетки \(meshAnchorCount) — можно экспортировать"
+    }
+
     private func beginExport() {
-        pauseSession = true
+        // Keep the session running while capturing mesh anchors, then pause only for the name alert.
         alertView(
             title: "Сохранить скан",
             message: "Введите имя файла",
-            hintText: "стол-на-кухне"
+            hintText: "комната-кухня"
         ) { text in
             exportFileName = text
             statusMessage = "Сохранение…"
+            // Export while session is still running so currentFrame keeps mesh anchors.
             exportTrigger += 1
         } secondaryAction: {
             pauseSession = false

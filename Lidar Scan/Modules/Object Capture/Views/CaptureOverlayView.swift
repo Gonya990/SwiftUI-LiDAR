@@ -171,14 +171,13 @@ private struct TutorialView: View {
         static let tutorialText = NSLocalizedString(
             "Move slowly around your object. (Object Capture, Orbit, Tutorial)",
             bundle: Bundle.main,
-            value: "Move slowly around your object.",
+            value: "Медленно обойди один предмет по кругу.",
             comment: "Guided feedback message to move slowly around object to start capturing."
         )
     }
 }
 
 private struct BoundingBoxGuidanceView: View {
-    @Environment(AppDataModel.self) var appModel
     var session: ObjectCaptureSession
     var hasDetectionFailed: Bool
 
@@ -200,34 +199,14 @@ private struct BoundingBoxGuidanceView: View {
 
     private var guidanceText: String? {
         if case .ready = session.state {
-            switch appModel.captureMode {
-                case .object:
-                    if hasDetectionFailed {
-                        return NSLocalizedString(
-                            "Can‘t find your object. It should be larger than 3 in (8 cm) in each dimension.",
-                            bundle: Bundle.main,
-                            value: "Can‘t find your object. It should be larger than 3 in (8 cm) in each dimension.",
-                            comment: "Feedback message when detection has failed.")
-                    } else {
-                        return NSLocalizedString(
-                            "Move close and center the dot on your object, then tap Continue. (Object Capture, State)",
-                            bundle: Bundle.main,
-                            value: "Move close and center the dot on your object, then tap Continue.",
-                            comment: "Feedback message to fill the camera feed with the object.")
-                    }
-                case .area:
-                    return NSLocalizedString(
-                        "Look at your subject (Object Capture, State).",
-                        bundle: Bundle.main,
-                        value: "Look at your subject.",
-                        comment: "Feedback message to look at the subject in the area mode.")
-                }
+            // Capture is locked to object mode — always guide toward a single subject.
+            if hasDetectionFailed {
+                return "Не удалось найти предмет. Он должен быть больше ~8 см по каждой стороне и стоять отдельно."
+            } else {
+                return "Подойди ближе и наведи точку на ОДИН предмет, затем нажми «Продолжить»."
+            }
         } else if case .detecting = session.state {
-            return NSLocalizedString(
-                "Move around to ensure that the whole object is inside the box. Drag handles to manually resize. (Object Capture, State)",
-                bundle: Bundle.main,
-                value: "Move around to ensure that the whole object is inside the box. Drag handles to manually resize.",
-                comment: "Feedback message to resize the box to the object.")
+            return "Обойди предмет: вся модель должна быть внутри рамки. Подтяни углы, если нужно."
         } else {
             return nil
         }

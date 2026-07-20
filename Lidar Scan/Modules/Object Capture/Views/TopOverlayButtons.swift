@@ -54,7 +54,7 @@ private struct CaptureCancelButton: View {
         static let cancel = NSLocalizedString(
             "Cancel (Object Capture)",
             bundle: Bundle.main,
-            value: "Cancel",
+            value: "Отмена",
             comment: "Title for the Cancel button on the object capture screen.")
     }
 }
@@ -95,14 +95,14 @@ private struct NextButton: View {
         static let next = NSLocalizedString(
             "Next (Object Capture)",
             bundle: Bundle.main,
-            value: "Next",
+            value: "Далее",
             comment: "Title for the Next button on the object capture screen."
         )
 
         static let done = NSLocalizedString(
             "Done (Object Capture)",
             bundle: Bundle.main,
-            value: "Done",
+            value: "Готово",
             comment: "Title for the Done button on the object capture screen."
         )
     }

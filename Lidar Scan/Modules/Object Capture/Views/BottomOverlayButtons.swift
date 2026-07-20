@@ -46,11 +46,8 @@ struct BottomOverlayButtons: View, OverlayButtons {
             HStack {
                 switch session.state {
                     case .ready:
-                    if appModel.orbit == .orbit1 {
-                        CaptureModeButton(session: session,
-                                          showCaptureModeGuidance: $showCaptureModeGuidance)
-                            .frame(width: 30)
-                    }
+                        // Area mode toggle removed — capture is always object-centric.
+                        Color.clear.frame(width: 30)
                     case .detecting:
                         AutoDetectionStateView(session: session)
                     default:
@@ -93,12 +90,7 @@ private struct CaptureButton: View {
 
     private var buttonLabel: String {
         if session.state == .ready {
-            switch appModel.captureMode {
-                case .object:
-                    return LocalizedString.continue
-                case .area:
-                    return LocalizedString.startCapture
-            }
+            return LocalizedString.continue
         } else {
             if !appModel.isObjectFlipped {
                 return LocalizedString.startCapture
@@ -110,12 +102,8 @@ private struct CaptureButton: View {
 
     private func performAction() {
         if session.state == .ready {
-            switch appModel.captureMode {
-            case .object:
-                hasDetectionFailed = !(session.startDetecting())
-            case .area:
-                session.startCapturing()
-            }
+            // Always detect a single object bounding box before capturing.
+            hasDetectionFailed = !(session.startDetecting())
         } else if case .detecting = session.state {
             session.startCapturing()
         }
@@ -125,12 +113,12 @@ private struct CaptureButton: View {
         static let startCapture = NSLocalizedString(
             "Start Capture (Object Capture)",
             bundle: Bundle.main,
-            value: "Start Capture",
+            value: "Начать съёмку",
             comment: "Title for the Start Capture button on the object capture screen.")
         static let `continue` = NSLocalizedString(
             "Continue (Object Capture, Capture)",
             bundle: Bundle.main,
-            value: "Continue",
+            value: "Продолжить",
             comment: "Title for the Continue button on the object capture screen.")
     }
 }

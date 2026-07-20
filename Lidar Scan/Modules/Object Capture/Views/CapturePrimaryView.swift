@@ -19,7 +19,8 @@ struct CapturePrimaryView: View {
         ZStack {
             ObjectCaptureView(session: session,
                               cameraFeedOverlay: { GradientBackground() })
-            .hideObjectReticle(appModel.captureMode == .area)
+            // Always show the object reticle — we lock capture to a single object.
+            .hideObjectReticle(false)
             .blur(radius: appModel.showOverlaySheets ? 45 : 0)
             .transition(.opacity)
 

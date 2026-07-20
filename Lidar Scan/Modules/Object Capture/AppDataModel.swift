@@ -218,7 +218,12 @@ extension AppDataModel {
             preconditionFailure("captureFolderManager unexpectedly nil!")
         }
 
+        // Always start in object-centric mode (bbox + reticle) so reconstruction
+        // targets a single subject rather than an area/room sweep.
+        captureMode = .object
+
         var configuration = ObjectCaptureSession.Configuration()
+        // Allow a denser orbit around one object; still reconstruct on-device.
         configuration.isOverCaptureEnabled = true
         configuration.checkpointDirectory = captureFolderManager.checkpointFolder
         // Starts the initial segment and sets the output locations.
@@ -246,8 +251,11 @@ extension AppDataModel {
         logger.debug("startReconstruction() called.")
 
         var configuration = PhotogrammetrySession.Configuration()
+        // Object-centric capture: keep masking on so the model is the subject, not the room.
         if captureMode == .area {
             configuration.isObjectMaskingEnabled = false
+        } else {
+            configuration.isObjectMaskingEnabled = true
         }
 
         guard let captureFolderManager else {

@@ -27,7 +27,7 @@ struct StartView: View {
                 VStack(spacing: 16) {
                     Text("LiDAR 3D-сканер")
                         .font(.title2.bold())
-                    Text("Комнаты — быстрая LiDAR-сетка OBJ. Предметы — детальный текстурированный USDZ через Object Capture.")
+                    Text("Комната — LiDAR-сетка OBJ (голубая сетка на экране). Предмет — один объект в кадре, объёмная USDZ-модель через Object Capture.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -55,7 +55,7 @@ struct StartView: View {
                     }
                     .disabled(!ObjectCaptureSession.isSupported)
 
-                    Text("Перед сканированием предмета уберите сыпучие и движущиеся детали. Предмет должен оставаться неподвижным и неизменным; лучше всего подходят матовые поверхности с заметной текстурой и ровный рассеянный свет.")
+                    Text("Сканируй один предмет целиком: убери фон и лишние вещи, зафиксируй объект, обойди его по кругу. Лучше всего — матовые поверхности с текстурой и ровный свет. Не снимай всю комнату в режиме предмета.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)

@@ -16,42 +16,18 @@ final class FeedbackMessages {
            switch feedback {
                case .objectTooFar:
                    if captureMode == .area { return nil }
-                   return NSLocalizedString(
-                    "Move Closer (Object Capture)",
-                    bundle: Bundle.main,
-                    value: "Move Closer",
-                    comment: "Feedback message to move closer for object capture")
+                   return "Подойди ближе к предмету"
                case .objectTooClose:
                    if captureMode == .area { return nil }
-                   return NSLocalizedString(
-                    "Move Farther Away (Object Capture)",
-                    bundle: Bundle.main,
-                    value: "Move Farther Away",
-                    comment: "Feedback message to move back for object capture")
+                   return "Отойди чуть дальше"
                case .environmentTooDark:
-                   return NSLocalizedString(
-                    "More Light Required (Object Capture)",
-                    bundle: Bundle.main,
-                    value: "More Light Required",
-                    comment: "Feedback message that shows the environment is too dark for capturing")
+                   return "Нужно больше света"
                case .environmentLowLight:
-                   return NSLocalizedString(
-                    "More Light Recommended (Object Capture)",
-                    bundle: Bundle.main,
-                    value: "More Light Recommended",
-                    comment: "Feedback message to increase lighting for object capture")
+                   return "Рекомендуется больше света"
                case .movingTooFast:
-                   return NSLocalizedString(
-                    "Move slower (Object Capture)",
-                    bundle: Bundle.main,
-                    value: "Move slower",
-                    comment: "Feedback message to slow down for object capture")
+                   return "Двигайся медленнее"
                case .outOfFieldOfView:
-                   return NSLocalizedString(
-                    "Aim at your object (Object Capture)",
-                    bundle: Bundle.main,
-                    value: "Aim at your object",
-                    comment: "Feedback message to aim at your object for object capture")
+                   return "Наведи камеру на предмет"
                default: return nil
            }
     }
