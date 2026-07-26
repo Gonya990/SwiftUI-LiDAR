@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Igor G-LIDAR — презентация и инструкция</title>
+  <style>
+    :root {
+      --bg0: #0b1220;
+      --bg1: #132033;
+      --ink: #eef4ff;
+      --muted: #9db0c9;
+      --accent: #3d8bfd;
+      --accent2: #6c5ce7;
+      --ok: #3dd6c6;
+      --card: rgba(255, 255, 255, 0.06);
+      --line: rgba(255, 255, 255, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: radial-gradient(1200px 700px at 10% -10%, #1a3a66 0%, transparent 55%),
+                  radial-gradient(900px 500px at 100% 0%, #2a1f55 0%, transparent 50%),
+                  linear-gradient(160deg, var(--bg0), var(--bg1));
+      color: var(--ink);
+      font-family: "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    }
+    .deck {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .slide {
+      display: none;
+      width: min(1100px, 100%);
+      min-height: min(680px, calc(100vh - 120px));
+      padding: 40px 48px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+    }
+    .slide.active { display: grid; gap: 20px; align-content: start; }
+    .eyebrow {
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: var(--ok);
+      font-weight: 700;
+    }
+    h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.1; }
+    h2 { margin: 0; font-size: clamp(1.6rem, 3vw, 2.4rem); line-height: 1.15; }
+    p, li { color: var(--muted); font-size: 1.05rem; line-height: 1.55; }
+    ul { margin: 0; padding-left: 1.2rem; display: grid; gap: 8px; }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.1em 0.4em;
+      color: #d7e7ff;
+      font-size: 0.92em;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      align-items: center;
+    }
+    .media {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #000;
+      object-fit: contain;
+      max-height: 420px;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      border: 1px solid var(--line);
+      background: rgba(61, 139, 253, 0.12);
+      color: #cfe3ff;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+    .steps {
+      display: grid;
+      gap: 12px;
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.18);
+    }
+    .num {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white; font-weight: 700;
+    }
+    .nav {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: rgba(8, 14, 24, 0.85);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+    .nav button {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    .nav button:hover { background: rgba(61, 139, 253, 0.25); }
+    .progress { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 860px) {
+      .slide { padding: 28px 22px; min-height: auto; }
+      .hero-grid, .two-col { grid-template-columns: 1fr; }
+      .media { max-height: 280px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+
+    <section class="slide active" data-title="Титул">
+      <div class="eyebrow">Igor G-LIDAR · Product Guide</div>
+      <div class="hero-grid">
+        <div>
+          <h1>3D-сканер на LiDAR для iPhone и iPad Pro</h1>
+          <p>Комната → mesh <code>.obj</code>. Предмет → текстурированная модель <code>.usdz</code>. Библиотека сканов с шарингом через Файлы.</p>
+          <div class="chips">
+            <span class="chip">SwiftUI + ARKit</span>
+            <span class="chip">iOS 18+</span>
+            <span class="chip">Только устройство с LiDAR</span>
+          </div>
+        </div>
+        <img class="media" src="../../Screenshots/Start%20Screen.PNG" alt="Стартовый экран Igor G-LIDAR" />
+      </div>
+    </section>
+
+    <section class="slide" data-title="Что готово">
+      <div class="eyebrow">Что сделано</div>
+      <h2>Готовый продуктовый контур</h2>
+      <div class="two-col">
+        <ul>
+          <li><strong style="color:var(--ink)">Скан комнаты</strong> — голубая LiDAR-сетка в реальном времени, экспорт в <code>.obj</code></li>
+          <li><strong style="color:var(--ink)">Скан предмета</strong> — Object Capture, многопроходная съёмка → <code>.usdz</code></li>
+          <li><strong style="color:var(--ink)">Библиотека</strong> — превью, ShareLink, удаление локально</li>
+          <li><strong style="color:var(--ink)">Файлы iOS</strong> — сканы в «На моём iPhone → Igor G-LIDAR»</li>
+          <li><strong style="color:var(--ink)">RU UI</strong> и деплой-скрипт на физический iPhone</li>
+        </ul>
+        <img class="media" src="../../Screenshots/3D%20Scanning.PNG" alt="Скан комнаты с LiDAR-сеткой" />
+      </div>
+    </section>
+
+    <section class="slide" data-title="Что работает">
+      <div class="eyebrow">Статус</div>
+      <h2>Что работает сегодня</h2>
+      <ul>
+        <li>Все три сценария на <strong style="color:var(--ink)">физическом</strong> iPhone Pro / iPad Pro с LiDAR</li>
+        <li>Симулятор <strong style="color:var(--ink)">не поддерживается</strong> (ARKit LiDAR + Object Capture)</li>
+        <li>Кнопка «Сканировать предмет» отключена, если <code>ObjectCaptureSession.isSupported == false</code></li>
+        <li>Без LiDAR стартовый экран показывает, что сканирование недоступно</li>
+        <li>CI собирает проект через XcodeGen + <code>xcodebuild</code> на generic iOS</li>
+      </ul>
+    </section>
+
+    <section class="slide" data-title="Требования">
+      <div class="eyebrow">Перед запуском</div>
+      <h2>Требования</h2>
+      <ul>
+        <li>macOS с Xcode 16+ (SDK iOS 18)</li>
+        <li><code>xcodegen</code> (<code>brew install xcodegen</code>)</li>
+        <li>Физическое устройство с LiDAR, разблокированное и доверенное</li>
+        <li>Apple Developer team для подписи (в проекте: Team ID в <code>project.yml</code>)</li>
+      </ul>
+    </section>
+
+    <section class="slide" data-title="Запуск">
+      <div class="eyebrow">Как запустить</div>
+      <h2>Сборка и установка</h2>
+      <div class="steps">
+        <div class="step"><div class="num">1</div><div><p>Клонировать репозиторий и сгенерировать Xcode-проект:</p>
+          <p><code>xcodegen generate</code> → <code>open "Lidar Scan.xcodeproj"</code></p></div></div>
+        <div class="step"><div class="num">2</div><div><p>Выбрать схему <strong style="color:var(--ink)">Lidar Scan</strong> и физическое LiDAR-устройство (не Simulator).</p></div></div>
+        <div class="step"><div class="num">3</div><div><p>Или одной командой: <code>./scripts/deploy-iphone.sh</code> — build → install → launch.</p>
+          <p>При необходимости: <code>IOS_DEVICE_ID</code> / <code>IOS_CORE_DEVICE</code>.</p></div></div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Комната">
+      <div class="eyebrow">Сценарий 1</div>
+      <div class="hero-grid">
+        <div>
+          <h2>Сканировать комнату → OBJ</h2>
+          <div class="steps">
+            <div class="step"><div class="num">1</div><div><p>На старте нажми «Сканировать комнату».</p></div></div>
+            <div class="step"><div class="num">2</div><div><p>Медленно обойди пространство 30–60 сек. Голубая сетка = LiDAR видит поверхности.</p></div></div>
+            <div class="step"><div class="num">3</div><div><p>Когда зона покрыта — «Экспортировать 3D-модель», задай имя файла.</p></div></div>
+            <div class="step"><div class="num">4</div><div><p>Появится share sheet; файл также в <code>Documents/Scans/Rooms/</code>.</p></div></div>
+          </div>
+        </div>
+        <img class="media" src="../../Screenshots/Capture%203D%20Scan.gif" alt="Процесс сканирования комнаты" />
+      </div>
+    </section>
+
+    <section class="slide" data-title="Предмет">
+      <div class="eyebrow">Сценарий 2</div>
+      <h2>Сканировать предмет → USDZ</h2>
+      <ul>
+        <li>Один объект в кадре, убери фон и лишние вещи, зафиксируй предмет</li>
+        <li>Обойди по кругу (Object Capture ведёт по проходам)</li>
+        <li>Лучше матовые текстурированные поверхности и ровный свет</li>
+        <li>После съёмки — реконструкция → <code>model-mobile.usdz</code></li>
+        <li><strong style="color:var(--ink)">Не снимай всю комнату</strong> в режиме предмета</li>
+      </ul>
+    </section>
+
+    <section class="slide" data-title="Библиотека">
+      <div class="eyebrow">Сценарий 3</div>
+      <div class="hero-grid">
+        <div>
+          <h2>Мои 3D-сканы и Файлы</h2>
+          <ul>
+            <li>Кнопка «Мои 3D-сканы» — список сохранённых OBJ и USDZ</li>
+            <li>Превью, ShareLink, удаление свайпом</li>
+            <li>Путь: <strong style="color:var(--ink)">Файлы → На моём iPhone → Igor G-LIDAR</strong></li>
+            <li>Подпапки: <code>Scans/Rooms</code>, <code>Scans/Objects/…</code></li>
+          </ul>
+        </div>
+        <img class="media" src="../../Screenshots/View%203D%20Scan%20.PNG" alt="Просмотр 3D-скана" />
+      </div>
+    </section>
+
+    <section class="slide" data-title="Советы">
+      <div class="eyebrow">Практика</div>
+      <h2>Советы и ограничения</h2>
+      <ul>
+        <li>Комната: двигайся плавно, покрывай пол, стены и крупные объекты сеткой</li>
+        <li>Предмет: минимум кадров по гайду Object Capture; избегай блеска и прозрачности</li>
+        <li>Симулятор и устройства без LiDAR — не для реальной съёмки</li>
+        <li>Видео-гайд можно пересобрать: <code>./scripts/build-usage-video.sh</code></li>
+      </ul>
+      <p style="margin-top:12px">Текстовая версия: <code>docs/product/USAGE.md</code> · видео: <code>docs/product/igor-g-lidar-usage.mp4</code></p>
+    </section>
+
+  </div>
+
+  <div class="nav">
+    <button type="button" id="prev">← Назад</button>
+    <div class="progress" id="progress">1 / 1</div>
+    <button type="button" id="next">Далее →</button>
+  </div>
+
+  <script>
+    const slides = [...document.querySelectorAll(".slide")];
+    let i = 0;
+    const progress = document.getElementById("progress");
+    function show(n) {
+      i = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach((s, idx) => s.classList.toggle("active", idx === i));
+      progress.textContent = `${i + 1} / ${slides.length}`;
+    }
+    document.getElementById("prev").onclick = () => show(i - 1);
+    document.getElementById("next").onclick = () => show(i + 1);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); show(i + 1); }
+      if (e.key === "ArrowLeft") show(i - 1);
+    });
+    show(0);
+  </script>
+</body>
+</html>
