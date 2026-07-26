@@ -43,6 +43,20 @@ Select a physical LiDAR device and run the **Lidar Scan** scheme.
 
 The script regenerates a bloated Xcode project if needed, builds for device, installs, and launches `com.igorgoncharenko.lidarscan`. Unlock the phone (passcode) before install.
 
+## Презентация и видео
+
+Русскоязычная инструкция по продукту:
+
+- [docs/product/USAGE.md](docs/product/USAGE.md) — что готово, запуск, сценарии использования
+- [docs/product/igor-g-lidar-guide.html](docs/product/igor-g-lidar-guide.html) — слайд-презентация (откройте в браузере)
+- [docs/product/igor-g-lidar-usage.mp4](docs/product/igor-g-lidar-usage.mp4) — короткое обучающее видео
+
+Пересборка видео (нужны `ffmpeg`, ImageMagick, `say`):
+
+```bash
+./scripts/build-usage-video.sh
+```
+
 ## Tech stack
 
 - SwiftUI, ARKit, RealityKit, SceneKit
